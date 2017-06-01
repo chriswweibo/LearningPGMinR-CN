@@ -2083,132 +2083,139 @@ learn(g1,data1)
 
 ## 学习隐含变量——期望最大化算法
 
-The last part of this chapter is an important algorithm that we will use again in the course of this book. It is a very general algorithm used to learn probabilistic models in which variables are hidden; that is, some of the variables are not observed. Models with hidden variables are sometimes called latent variable models. The EM algorithm is a solution to this kind of problem and goes very well with probabilistic graphical models.
-Most of the time, when we want to learn the parameters of a model, we write
-an objective function, such as the likelihood function, and we aim at  nding the parameters that maximize this function. Generally speaking, one could simply use
-a black-box numerical optimizer and just compute the relevant parameters given this function. However, in many cases, this would be intractable and too prone to numerical errors (due to the inherent approximations done by CPUs). Therefore it is generally not a good solution.
-We therefore aim at using the speci city of our optimization problem (alongside the assumptions made by a graphical model about the joint probability distribution) to improve our computations and make them fast and reliable.
-The EM algorithm is a rather elegant solution to the problem of  nding optimal parameters for a graphical model and it can be applied to many types of model.
-[ 88 ]
-   
+本章的最后一部分介绍一个最重要的算法。这个算法会在本书中多次使用。这是一个学习隐含变量（即有些变量观察不到）概率模型的非常通用的算法。包含隐含变量的模型有时也叫做隐变量模型（latent variable models）。 期望最大化算法是解决这一类问题的方案，并且在概率图模型上也有很好的表现。
+
+多数情况下，当我们想学习模型的参数时，我们会写一个目标函数，例如似然函数，我们的目的是找出可以最大化函数的参数。通常，我们可以只用一个黑盒数值优化函数，计算给定函数的相关参数。然而，在多事情况下，这会比较难以驾驭，而且容易导致数值错误（因为CPU的内部估计误差）。所有这个通常不是一个很好的方案。
+
+我们力图使用优化问题的特异性（除了图模型对联合概率分布所做的假设）来改善计算流程，使其更快更可靠。
+
+对于找到图模型的最优参数问题，期望最大化算法是一种非常优雅的方案。它也可以用到许多类型的模型中。
+
 ### 隐变量
 
-Latent variables can be used in all models to, for example, introduce a level of simpli cation, to separate concepts, or to put some hierarchy into the models. For instance, we can observe a certain relationship between a set of variables, but instead of making all those variables dependent we would rather suppose that another hidden variable is simply the source of them and the dependency is done through this higher-level variable.
-This top-down approach helps to make for simpler models, as in the following  gure. This model is rather complex, isn't it ?
+隐变量可以用在所有模型中，以便引入一个简化层，或者分离概念，或者给模型定义一些层级。例如，我们可以观察变量之间的特定关系，我们并不让这些变量相互依赖，相反，假定有其他的隐含变量导出它们，而且依赖关系通过更高层的变量实现。
+
+这种自顶向下的方式可以生成更简单的模型，如下图所示。这个模型已经很复杂了，不是吗？
 
 ![](figures/89_1.png)
 
-But if we add hidden variables (those with a Greek letter in the following  gures), then the model becomes utterly simple and presumably tractable and easier to interpret. The problem is that we don't have data to estimate the probability distributions of the hidden variables and this is where we will need to use an EM algorithm.
+但是如果我们添加一下隐含变量（在下图中用希腊字母表示），模型会变得非常简单，且易于处理和理解。问题是我们并没有数据评估隐含变量的概率分布。这就需要期望最大化算法了。
 
 ![](figures/89_2.png)
      
-Learning Parameters
-We can add more levels too to the model and group the variables with different parents, as illustrated in the following example:
+我们还可以添加更多的隐含变量，以便使用不同的父节点对变量归类，如下图所示：
 
 ![](figures/90_1.png)
 
-## 期望最大化算法原理
-Because the latent variables are not observed, the likelihood function of such a model is a marginal distribution where we have to sum out (or integrate out) the hidden variables. Marginalization will create dependencies between the variables and make the problem complex to solve.
-The EM algorithm deals with this problem essentially by  lling-in missing data with their expected values, given a distribution. When we iterate this process over and over, it will converge to the maximum likelihood solution. This  lling-in is achieved by computing the posterior probability distribution of the hidden variables given
-a current set of parameters and the observed variables. This is what is done in the E-step, (E for Expectation). In the M-step, M for Maximization, the parameters
-of the models are adjusted and we iterate again with a new E-step. We will go on
-until we see a convergence in the parameters, or a convergence in the growth of the likelihood. Moreover, the EM algorithm gives us the certainty that, after each EM step, the likelihood of the model cannot go down. It means that, when the likelihood only increases by a tiny amount, we can conclude that the algorithm converged to a (local) maximum and we can stop the algorithm. The tiny amount depends on the application but it's not unusual to stop when the likelihood hasn't moved by more than 10-2 to 10-4. It's just a rule of thumb and the reader is encouraged to plot the likelihood curve to better understand the EM algorithm's behavior for his or her special case.
-[ 90 ]
+## 期望最大化的算法原理
+
+因为隐变量观察不到，这类模型的似然函数是边缘分布。我们需要对隐含变量求和。边缘化会生成变量之间的依赖关系，是问题变得难以解决。
+
+期望最大化算法通常会在给定分布的情况下，使用期望值填补缺失数据，来处理问题。当我们不断的迭代这一过程，它会收敛到最大似然函数。这个填补策略是通过给定当前变量集合以及可观测的变量，计算隐含变量的后验概率分布而实现。这就是E-步骤（E代表期望）。在M-步骤，M代表最大化，我们会调整模型参数，并在新的E-步骤中再次迭代。这个过程会一直持续，直到我们看到参数收敛，或者似然率的增长收敛。而且，期望最大化算法可以确定每一次EM步骤后模型的似然率不会下降。这意味着当似然率只增长了很小的量时，我们就可以说算法收敛到（局部）最大值，算法可以停止了。增长率的多少依赖于应用本身，但是当似然率的增长不超过$10^{-2}$或$10^{-4}$，算法也可以停止。这只是经验规则。针对具体的案例，读者可以尝试绘制似然率曲线来更好的理解期望最大化算法的行为。 
  
 ### 期望最大化算法推导
 
-Let's assume we have a dataset D of N iid points and the parameters of the graphical models are called θ. At this point, if you're wondering what this θ is, it is a big variable containing all the parameters for every variable of the graphical model. As it would be tedious to write a long collection, we simply resume them in a single high- dimensional variable.
-Let D = {x1, ..., xN} and θ ε R. The likelihood of the graphical model is de ned by: p(D|θ)=∏N p(xi |D)
-be decomposed as follow:
-i=1
-In the complete case where all the variables are observed, the likelihood function can
-L(θ)=log p(D|θ) =∑N logp(xi|θ)
-i=1
-=∑N ∑K logp(x(j)|pa(x(j)),θ)
-i=1 j=1 i i i =∑K Li(θi)
-j=1
-We  nd again the result we saw before where the log-likelihood, in the case of a graphical model, can be rewritten as the sum of the local log-likelihood for each variable—that is, each node in the graph.
-However, when we have hidden variables, we can't have this nice result. Let's call the observed variables x and the hidden variables y. The log-likelihood of the model can be written as:
-L(θ)=logp(X |θ)=log∑y p(x,y|θ)
-Here, X = {x,y} is the set of all the variables. And here is our main problem: the sum inside the log function is not nice to compute. In fact, in order to obtain the likelihood function we have to marginalize out the y hidden variable. And having this sum in the log function can potentially make all the variables inside it dependent on each other. Therefore, we would lose all the bene t of having a nice factorization thanks to using a graphical model. In the end, computing would become intractable.
-[ 91 ]
-Chapter 3
- Derivation of the EM algorithm
-  
-Learning Parameters
-But if we take any distribution q(y) over the hidden variables, it can de ne a lower bound on the log-likelihood function. Let's see why:
- L(θ)=log∑y p(x,y|θ) =log∑ q(y)p(x,y|θ)
-y q(y) ≥∑ q(y)log p(x,y|θ)
- y q(y)
-=∑y q(y)log p(x,y|θ)−∑y q(y)logq(y) = F (q,θ )
- This reasoning needs a bit of explanation now, line by line:
+假设我们有数据集$D$，包含$N$个$idd$（独立同分布）个点，图模型的参数为$\theta$。现在，如果还不理解$\theta$是什么，它其实是一个包含图模型中每个变量所有参数的变量。由于写出这个集合会很冗长，我们可以简单的把它看作是一个高维变量。
+
+设$D = \{x_1, ..., x_N\}$，$\theta \in R$。图模型的似然率有如下的定义：
+
+$$p(D\mid \theta)= \prod_{i=1}^N p(x_i \mid D)$$
+
+在完备情况下，即所有变量都可以被观测到，似然函数可以有如下分解:
+
+$$
+\begin{align}
+L(\theta) & = log \; p (D \mid \theta) \notag\\
+ & = \sum_{i=1}^N log \;p (x_i \mid \theta) \notag\\ 
+ & = \sum_{i=1}^N \sum_{j=1}^K log \;p (x_i^{(j)} \mid pa(x_i^{(j)}), \theta_i) \notag\\
+ & = \sum_{i=1}^K L_i(\theta_i)\notag\\ 
+\end{align}
+$$
+
+我们再次看到了之前对数似然率的结果。这个结果可以再次写成每个变量（即图中的节点）的局部对数似然率加和的形式。
+
+但是，当存在隐含变量的时候，我们的结果就不再优美。设可观测变量为$x$，隐含变量为$y$。模型的对数似然率可以写成：
+
+$$ L(\theta)=log \; p(X \mid \theta) = log \sum_y p(x,y \mid \theta) $$
+
+这里，$X = \{x,y\}$是所有变量的集合。我们的主要问题是：$log$函数内部的求和并不容易计算。事实上，为了获取似然函数，我们需要边缘化掉隐含变量$y$。有了这个求和，我们就可能让内部的所有变量都相互依赖。因此，由于使用图模型，我们会舍弃优良分解的所有好处。最终，计算会变得困难。
+
+
+但是如果使用隐含变量上任意分布$q(y)$, 它可以定义出对数似然函数的下界，让我们看看原因：
+
+$$\begin{align}
+L(\theta) & = log \;\sum_y p(x,y \mid \theta) \notag\\
+ & = log \;\sum_y q(y)\frac{p (x,y \mid \theta)}{q(y)} \notag\\ 
+ & \geq \sum_y q(y) log \frac{p (x,y \mid \theta)}{q(y)}  \notag\\
+ & = \sum_y q(y) log \; p(x,y \mid \theta) -\sum_y q(y) log \; q(y)\notag\\
+ & = F(q,\theta)\notag\\ 
+\end{align}
+$$
+
+
+再逐行解释一下其中的原因：
  
-1. This is the standard de nition of the log-likelihood over x where we
-marginalized out the hidden variables y.
-2. Here we introduce q(y) at the numerator and denominator so that they cancel
-out each other.
-3. Thanks to this, we can apply the Jensen inequality to obtain a lower bound.
-The right-hand side formula is the lower bound on L(θ).
-4. The lower bound is simpli ed again and we have two terms where the right-
-most term is independent of θ and x.
+1. 这是$x$上对数似然率的标准定义，其中我们边缘化掉隐变量$y$。
+2. 这里我们在分子和分母中引入$q(y)$，以便它们可以相互抵消。 
+3. 基于这个原因，我们可以使用詹森不等式来或者下界。公式的右边就是$L(θ)$的下界。
+4. 这个下界可以进一步简化。最右边的项独立于$\theta$和$x$。
 
-So in the end, this new function F(q, θ) ≤ L(θ) is the lower bound on the log-likelihood. The way the EM algorithm works is by alternating optimizations in two steps:
+最终，新的函数$F(q, \theta) ≤ L(\theta)$ 是对数似然率的下界。
 
-* E-step: qk ← argmaxq F (q,θk −1 ) 
-* M-step:θk ←argmaxθF(qk,θk−1)
+期望最大化算法的的运行方式是通过调整两个步骤中的优化来完成：
 
-The algorithm is usually initialized with a random set of parameters: θ0.
-What this algorithm does is  rst  nd a new marginal distribution over the hidden variable q(y) given the current set of parameters θk-1 and then it  nds the maximum likelihood estimation of the parameters θk using the previous distribution q. So in fact, in step 1, the E-step, the maximum of q is obtained by setting qk (y)= p(y | x,θk−1 ). And, at this point, the lower bound becomes an equality:
-F (qk ,θk −1 ) = L (θk −1 ) [ 92 ]
+* __E-步骤__: $q_k \gets argmax_q F(q,\theta_{k−1})$ 
+* __M-步骤__: $\theta_k \gets argmax_{\theta} F(q_k,\theta_{k−1})$
+
+这个算法通常会用参数的随机集合$\theta_0$来做初始化。
+
+算法首先在给定当前参数集合$\theta_{k-1}$下找出隐含变量$q(y)$的一个新的边缘分布，然后使用之前的分布$q$找出参数$\theta_k$的最大似然估计。事实上，在步骤1的E-步骤中，$q$的最大值可通过设定$q_k(y)= p(y | x,\theta_{k-1})$得到。新增，下界变成了等式：
+
+$$F(q_k,\theta_{k-1})=L(\theta_{k-1})$$
  
-Chapter 3
-This result is very important because it guarantee that the likelihood can only go
-up or stay the same, step after step. So this result means that, using the current parameters θk-1, we infer the distribution p(y | x, θk-1) given the other observed variables. Any inference algorithm can be used at this stage, like those we saw in the previous chapter. Moreover, this creates an expected complete set of observations given the current parameters.
-The maximum in the M-step is obtained by maximizing the  rst term in line 4 of the previous derivation; that is, the expected log-likelihood under the distribution q, the one we just computed.
-So, at the beginning of teach loop of the EM algorithm, we have F=L and the
-E-step does not change θ. And so we know that the E-step will never decrease
-the likelihood. The log-likelihood will therefore only increase or stay the same. In practice, we will usually see a convergence of the log-likelihood. When the difference is very small, we can stop the algorithm and consider that the current solution is the good one.
+这个结果非常重要，因为它保证了似然率在每一步中只能增长或保持不变。因此这个结果意味着，使用当前的参数$\theta_{k-1}$，我们可以推出给定其他观察变量下的分布$p(y | x, \theta_{k-1})$。这个步骤可以使用之前的章节中的任何推理算法。而且，这个过程会创建给定当前参数下期望的观察结果全集。
+
+M-步骤中的最大值可以通过最大化之前推导中第4行的第一项实现，即分布$q$下期望的对数似然率。
+
+所有在期望最大化算法的开始介绍中，我们有$F=L$。E-步骤也不会更改$\theta$。我们知道E-步骤不会降低似然率。因此对数似然率只会增长或保持不变。实际应用中，我们通常会看到对数似然率的收敛。当增长率很小时，我们可以停止算法，认为当前的方案就是优良方案。
 
 ### 对图模型使用期望最大化算法
 
-Practically we will consider a graphical model with discrete variables as we have been using so far. For example, let's say that somewhere in the graph we have two variables A and B, such that B is the parent of A. So locally we have the distribution P(A|B) associated to node A.
-We recall that the maximum likelihood estimate θA|B is computed by:
-θA/B = countof eachcombinationof A,B countof eachcombinationof B
-This is what we saw and implemented before in R. So far, nothing new. Remember, we used the ddply function to ef ciently compute this in R in one call. You could also use the aggregate function to obtain the same result.
-But this formula is only valid when A and B are fully observed! And here they are not. Therefore, using the EM algorithm to overcome this problem is very simple.
-The M-step is in this case:
-ˆ ∑N p(A=a,B=b|X=x) θ =i=1 i
-A=a|B=b ∑N p(A=b|X=x)
-[ 93 ]
-   i=1
-i
-  
-Learning Parameters
-But how do we obtain these two probability distributions? We obtain them in the E-step, using the observed X variables and our preferred inference algorithm. As for the parameters used in A and B, they are the parameters from the previous step of the EM algorithm.
-In conclusion, in plain English, we recall the steps of the EM algorithm:
+正如已经看到的，我们会在实际问题中使用带有离散变量的图模型。例如，假设图中的某个地方有两个变量$A$和$B$，使得$B$是$A$的父节点。因此我们有节点$A$的局部分布$P(A|B)$。
 
-1. Initialize the graphical model with random parameters. Just be sure that the distribution sums to 1, of course. Random parameters seem to give better results than a uniform distribution, but I'm just giving you a practical tip here.
-2. Until convergence of the log-likelihood, do the following:
-° E-step: Compute the posterior distribution, using your preferred inference algorithm, of all the hidden variables. This is the q distribution.
-° M-step: Compute the new set of parameters of the graphical model using the inferred distribution we saw before.
-° Update the log-likelihood and check whether it converged, usually by checking whether the difference between the current likelihood and the previous one is smaller than a predefined threshold.
+回忆一下，最大似然估计$\theta_{A|B}$的计算如下：
 
-And so the M-step acts as if the hidden variables were observed by using the expected distribution on it.
+$$\theta_{A/B}=\frac{count \,of \,each \,combination \,of \,A,B}{count \,of \,each \,combination \,of \,B}$$
+
+这是我们在用R之前所看到的和实现了的。到目前为止，没有什么新的知识了。之前，我们使用`ddply`函数高效的在一次调用中执行计算。读者也可以使用`aggregate`函数来得到同样的结果。
+
+但是这个公式只会在$A$和$B$完全可观测的情况下有效！这里二者并非如此。而使用期望最大化算法克服这个困难很简单。
+
+M-步骤就是处理这种情况：
+
+$$\hat\theta_{A=a \mid B=b}= \frac {\sum_{i=1}^N p(A=a,B=b \mid X=x_i)}{\sum_{i=1}^N p(A=a \mid X=x_i)}$$
+
+但是如何获取这两个概率分布？我们在E-步骤中使用观测变量$X$和选定的推理算法得到它们。至于A和B中使用的参数，它们是期望最大化算法之前步骤的参数。
+
+最后，我们回忆一下期望最大化算法的所有步骤：
+
+1. 用随机参数初始化图形模型。确保分布的总和为1。随机参数似乎能够提供比均匀分布更好的结果，但这只是给你一个实用的提示。
+2. 完成以下步骤，直到对数似然率收敛：
+     + __E-步骤__: 使用选定的推理算法计算所有隐藏的变量的后验分布。这是$q$分布。
+     + __M-步骤__: 使用前面推断出的分布计算图模型的新参数集。
+     + 更新对数似然率，检查是否收敛。通常需要检查当前似然率和上一步似然率的差异是否小于预定于的阈值。
+
+因此M-步骤似乎可以使用期望的概率实现隐含变量可观测。
 
 ## 小结
 
-In this chapter we saw how to compute the parameters of a graphical model by using the maximum likelihood estimation.
-The reader should note however that this approach is not Bayesian and could be improved by setting prior distributions over the parameters of the graphical models. This could be used to include more domain knowledge and help in obtaining better estimations.
-When the data is not fully observed and variables are hidden, we learned how to use the very powerful EM algorithm. We also saw a full implementation of a learning algorithm in R for a fully observed graph.
-[ 94 ]
-   
-Chapter 3
-We would like, at this point, to encourage the reader to use the ideas presented
-in this chapter to extend and improve his or her own learning algorithms. The
-most important requirement when doing machine learning is to focus on what
-is not working. From a dataset, any algorithm will, at some point, extract some information. However, when one focuses on the errors in an algorithm and where it does not work, one will really  nd value in the data.
-In the next chapter, we will look at several simple, yet powerful Bayesian models that can be represented as graphical models. We will see that some of them can be highly optimized for inference and learning. We will also explore an application of the EM algorithm to  nd clusters in data, using Gaussian mixture models.
- [ 95 ]
+在本章中，我们看到了如何使用最大似然估计计算的图模型的参数。读者应该看到，这种方法不是贝叶斯的，可以通过设置图模型参数的先验分布来改善。这个过程会用到更多的领域知识，并帮助获得更好的估计。
+
+当数据无法完全观测到，有些变量是隐藏的，我们学会了如何使用非常强大的期望最大化算法。我们还看到了一个完全可观测的图形上，R语言学习算法的完整实现。
+
+现在，我们鼓励读者使用本章中的思想，扩展和改进自己的学习算法。机器学习最重要的需求是专注于算法无法生效的场景。任何算法都会从数据集中提取一些信息。然而，当关注于算法的错误以及它不生效的地方，我们会发现数据中的价值。
+
+在下一章中，我们将看几个简单的，但功能强大的，可以表示为图模型的贝叶斯模型。我们会看到，他们中的一些可以高度优化以便推理和学习。我们还将使用高斯混合模型，探讨期望最大化算法的应用，进而找出数据中的簇。
 
 -------
 
