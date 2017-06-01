@@ -2083,14 +2083,14 @@ learn(g1,data1)
 
 ## 学习隐含变量——期望最大化算法
 
-The last part of this chapter is an important algorithm that we will use again in the course of this book. It is a very general algorithm used to learn probabilistic models in which variables are hidden; that is, some of the variables are not observed. Models with hidden variables are sometimes called latent variable models. The EM algorithm is a solution to this kind of problem and goes very well with probabilistic graphical models.
-Most of the time, when we want to learn the parameters of a model, we write
-an objective function, such as the likelihood function, and we aim at  nding the parameters that maximize this function. Generally speaking, one could simply use
-a black-box numerical optimizer and just compute the relevant parameters given this function. However, in many cases, this would be intractable and too prone to numerical errors (due to the inherent approximations done by CPUs). Therefore it is generally not a good solution.
-We therefore aim at using the speci city of our optimization problem (alongside the assumptions made by a graphical model about the joint probability distribution) to improve our computations and make them fast and reliable.
-The EM algorithm is a rather elegant solution to the problem of  nding optimal parameters for a graphical model and it can be applied to many types of model.
-[ 88 ]
-   
+本章的最后一部分介绍一个最重要的算法。这个算法会在本书中多次使用。这是一个学习隐含变量（即有些变量观察不到）概率模型的非常通用的算法。包含隐含变量的模型有时也叫做隐变量模型（latent variable models）。 期望最大化算法是解决这一类问题的方案，并且在概率图模型上也有很好的表现。
+
+多数情况下，当我们想学习模型的参数时，我们会写一个目标函数，例如似然函数，我们的目的是找出可以最大化函数的参数。通常，我们可以只用一个黑盒数值优化函数，计算给定函数的相关参数。然而，在多事情况下，这会比较难以驾驭，而且容易导致数值错误（因为CPU的内部估计误差）。所有这个通常不是一个很好的方案。
+
+我们力图使用优化问题的特异性（除了图模型对联合概率分布所做的假设）来改善计算流程，使其更快更可靠。
+
+对于找到图模型的最优参数问题，期望最大化算法是一种非常优雅的方案。它也可以用到许多类型的模型中。
+
 ### 隐变量
 
 Latent variables can be used in all models to, for example, introduce a level of simpli cation, to separate concepts, or to put some hierarchy into the models. For instance, we can observe a certain relationship between a set of variables, but instead of making all those variables dependent we would rather suppose that another hidden variable is simply the source of them and the dependency is done through this higher-level variable.
