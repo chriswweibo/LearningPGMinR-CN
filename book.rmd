@@ -2149,8 +2149,7 @@ L(\theta) & = log \;\sum_y p(x,y \mid \theta) \notag\\
  & \geq \sum_y q(y) log \frac{p (x,y \mid \theta)}{q(y)}  \notag\\
  & = \sum_y q(y) log \; p(x,y \mid \theta) -\sum_y q(y) log \; q(y)\notag\\
  & = F(q,\theta)\notag\\ 
-\end{align}
-$$
+\end{align}$$
 
 
 再逐行解释一下其中的原因：
@@ -2253,6 +2252,7 @@ plot(x1,col=2,xlim=c(-5,5),ylim=c(-5,5))
 points(x2,col=3)
 ```
 
+
 ![](figures/99_1.png)
 
 这个例子展示了两个变量的二元分类问题。两个变量通过$x$轴和$y$轴表示。问题似乎很明显，事实上并非如此，因为红色类别和绿色类别的分界面定义并不清楚。这就是典型的现实世界的例子。
@@ -2321,6 +2321,7 @@ install.packages("e1071")
 library(e1071)
 ```
 
+
 这个程序包提供了朴素贝叶斯模型的完整实现。我们可以加载数据并查看结果：
 
 ```{r,eval=F}
@@ -2357,6 +2358,7 @@ Y             [,1]      [,2]
   virginica  2.026 0.2746501
 ```
 
+
 我们再解释一下这个例子。参数`laplace`控制数据的拉普拉斯平滑，以便处理数据并不完美平衡或数据集有问题的情形。我们后边会再回到这个问题，但是这是大多数分类问题都必须处理的一个主要问题。
 
 使用这个模型并尝试预测（或推断）类别，我们有：
@@ -2365,6 +2367,7 @@ Y             [,1]      [,2]
 p <- predict(model,iris)
 hitrate <- sum(p == iris$Species) / nrow(iris)
 ```
+
 
 我们得到了 0.96的命中率，即96%的数据点都被正确分类。这还不错，但是需要记得我们使用了训练集得到这个百分比。你不能只是用训练集中的点来评估分类模型的真正能力。理想情况下，我们应该把数据集分成两部分，假设我们使用$1/3$的数据进行测试，$2/3$的数据进行模型训练。这种分割需要以随机的方式完成：
 
@@ -2383,36 +2386,28 @@ hitrate <- sum(p == iris$Species) / nrow(iris)
 
 这个问题叫做**过拟合**（over-fitting）。过拟合的解决可以使用贝叶斯方法，并在模型中包含额外信息，比如“如果数据没有表示出来，可以假设它们有很小的概率，而不是零概率”。
 
-一种简便易行的方法是使用模型参数的先验概率，并使用贝叶斯的方式开发模型。让我们做一些假设来简化计算。首先，我们假设所有恶天恒办理 First of all, we will assume that all the feature variables have the same  nite number values. We will call this number S. You can easily generalize this to any number of values for each feature, but in our presentation it makes things simpler. Then we will assume we can use a factored prior on the θ feature parameters, as follows:
-p(θ)=p(π)∏N ∏C p(θic) i=1 c=1
-Here, θ represents all the parameters. In order to make it clear, we use the following notation:
+一种简便易行的方法是使用模型参数的先验概率，并使用贝叶斯的方式开发模型。让我们做一些假设来简化计算。首先，我们假设所有的特征变量都取相同有限数量的值。我们记这个数为$S$。读者可以对每一个特征推广到任意数量的值，但是在我们的讲解中会尽量简单。然后我们假设在特征参数$\theta$上使用因子化的先验概率，如下：
 
-* θ represents all the feature parameters and π the class parameters
-* θi represents all the parameters of the variable i—that is, the parameters of
-the conditional distribution p(Xi | C)
-* θic represents all the parameters of the variable i—that is, the parameter
- distribution p(Xi | C = c)
-* θ(s) represents the parameter of the probability p(X = s| C = c)—that is,
-ic i
-because Xi is a discrete multinomial variable (in fact it's more accurate to say
-categorical than multinomial here), p ( X = s | C = c ) = θ (s ) i ic
+$$p(\theta)=p(\pi)\prod_{i=1}^N \prod_{c=1}^C p(\theta_{ic})$$
 
-And because we just mentioned multinomial distribution, it's important to note that the Dirichlet distribution is also the conjugate distribution for the multinomial (and
-the categorical) distribution. If we consider all the θ(s) to be random variables and ic
-no longer just simple parameters, we need to give them a probability distribution a priori. We will assume they are Dirichlet distributed for two reasons:
+这里，$\theta$表示所有参数。为了更加清晰我们使用下列表示法：
 
-* The Dirichlet distribution is a distribution over a vector of values such that their sum is 1, which corresponds to the well-known constraint that
-∑S θ(s) =1. So far, nothing new. s=1 ic
-* The Dirichlet distribution being the conjugate prior for the multinomial distribution, this means that, if a data point has a categorical or multinomial distribution and the prior distribution on the parameters is a Dirichlet (as in our case), then the posterior distribution on the parameters is also a Dirichlet. And this will simplify all of our computations.
+* $\theta$表示所有特征参数，$\pi$表示类别参数
+* $\theta_i$表示变量$i$的所有参数，即条件概率$p(X_i | C)$的参数
+* $\theta_{ic}$表示变量$i$的在类别$c$下的所有参数，即条件概率$p(X_i | C=c)$的参数
+* $\theta_{ic}^{(s)}$表示概率$p(X = s| C = c)$的所有参数。因为$X_i$是一个离散多项式变量（准确的说是类别变量），$p(X_i=s|C=c)=\theta_{ic}^{(s)}$
 
-In fact, contumacy is a very powerful tool in Bayesian data analysis. In practice it works as follows:
+由于我们提到了多项式分布，牢记狄利克雷分布也是多项式（以及类别）分布的一种变形。如果我们把所有的$\theta_{ic}^{(s)}$都当做随机变量，而不仅仅是简单的参数我们需要给定先验分布。我们会假设它们服从狄利克雷分布，原因有两个：
 
-* Let's say that α is the concentration parameter—that is, the parameter of the Dirichlet distribution Dir(⍺).
-* So we assume that the θ's are distributed Dirichlet—that is p(θic | ⍺) = Dir(⍺).
-* And, of course, we know that our feature variables have a categorical or
-multinomial distribution.
-* Therefore the posterior probability of the parameters of the distribution of Xi
-after counting data (as we did before), will be a Dirichlet Dir(Ni +α), where Ni is the counts we did before! It's as simple as that, thanks to the conjugacy.
+* 狄利克雷分布是值向量上的分布，分布值和为1。这满足通用的约束$\sum_{s=1}^S \theta_{ic}^{(s)}=1$。
+* 狄利克雷分布作为多项式分布的变形，意味着如果数据点有类别或多项式分布且参数上的先验分布也是狄利克雷分布，那么参数上的后验分布也是狄利克雷分布。我们可以简化所有计算。
+
+事实上，倔强分析也是贝叶斯数据分析的有力工具。实际执行过程如下：
+
+* 设$\alpha$是集中参数，即狄利克雷分布$Dir(\alpha)$的参数。
+* 因此我们假设$\theta$也服从狄利克雷分布，即$p(θ_{ic} | \alpha) = Dir(\alpha)$。
+* 当然，我们还知道特征变量服从类别或多项式分布。
+* 因此，通过数据计算，$X_i$分布的参数后验概率也服从狄利克雷分布$Dir(N_i+\alpha)$，其中$N_i$是计数，和之前的工作一样！由于是一种变形形式，过程很简单。
 
 So  nally, if we want to incorporate the Dirichlet prior into our computations, the posteriors of the parameters for the class variable are:
 πc=Nc+αc whereα0=∑αc. N +α0 c
