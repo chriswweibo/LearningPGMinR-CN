@@ -2221,26 +2221,29 @@ $$\hat\theta_{A=a \mid B=b}= \frac {\sum_{i=1}^N p(A=a,B=b \mid X=x_i)}{\sum_{i=
 
 # 第4章 贝叶斯建模——基础模型
 
-After learning how to represent graphical models, how to compute posterior distributions, how to use parameters with maximum likelihood estimation, and even how to learn the same models when data is missing and variables are hidden, we are going to delve into the problem of modeling using the Bayesian paradigm. In this chapter, we will see that some simple problems are not easy to model and compute and will necessitate speci c solutions. First of all, inference is a dif cult problem and the junction tree algorithm only solves speci c problems. Second, the representation of the models has so far been based on discrete variables.
-In this chapter we will introduce simple, yet powerful, Bayesian models, and show how to represent them as probabilistic graphical models. We will see how their parameters can be learned ef ciently, by using different techniques, and also how to perform inference on those models in the most ef cient way. The algorithms we will see are adapted to these models and take into account the speci city of each.
-And, for the  rst time, we will start to use variables with continuous support—that is, random variables that can take any value as a number—and not just a  nite number of discrete values.
-We will look at simple models that can be used as a basic component for more advanced solutions. These models are fundamental and we will go from very simple things to more advanced problems, such as Gaussian mixture models. All these models are heavily used and have a nice Bayesian representation that we will present throughout this chapter.
-[ 97 ]
-  
-Bayesian Modeling – Basic Models
-More speci cally, we will be interested in the following models:
+在学习完如何表示图模型，如何计算后验分布，如何用最大似然估计使用参数，以及如何在数据缺失和存在隐含变量下学习相同的模型时，我们要深入研究使用贝叶斯范式来进行建模的问题。在本章中，我们会看到一些简单的问题并不容易建模和计算，进而需要特定的解决方案。首先，推理是一个困难的问题，联结树算法只能解决特定的问题。其次，模型的表示目前都是基于离散变量的。
 
-* The Naive Bayes model and its extension, used mainly for classification
-* The Beta-Binomial model, which is one of the most fundamental modelings
-* Gaussian Mixture models, one of the most used clustering models
+在本章中，我们将介绍简单，但功能强大的贝叶斯模型，并展示如何作为概率图模型表示它。我们会看到使用不同的技术，它们的参数可以有效地学习出来，以及如何以最有效的方式在这些模型上进行推理。我们将看到这些算法是可以适应这些模型，同时考虑到每个特异性。
+
+首先，我们开始使用带有连续值的变量，即可以取任意数值的随机变量，而不仅仅是有限数量的离散数值。
+
+我们会看到一些简单的模型，它们是复杂解决方案的基本构成。这些模型是基本的模型，我们将从非常简单的事情逐渐过渡到更复杂的问题，如高斯混合模型。所有这些模型都在被广泛使用，并有很好的贝叶斯表示。我们会在这一章逐步介绍。
+
+更具体的，我们会对如下模型感兴趣：
+
+* 朴素贝叶斯 模型及其扩展，主要用于分类
+* Beta-二项分布模型，这也是最基础的模型
+* 高斯混合模型，最常用的聚类模型之一
 
 ## 朴素贝叶斯模型
 
-The Naive Bayes model is one of the most well-known classi cation models used in machine learning. Despite its simple appearance, this model is very powerful and gives good results with little effort. Of course, when considering the problem of classi cation, one should not always stay with one model, such as Naive Bayes, but should try out many examples to see which one is the best with a particular dataset.
-Classi cation is an important problem in machine learning and it could be de ned as the task of associating observations to a particular class. Let's say we have a dataset with n variables and we assign a class to each data point. The class could be {0,1}
-or {a,b,c,d}, {red, blue, green, yellow}, or {warm, cold}, and so on. We will see that it is sometimes easier to consider binary classi cation problems where one has only two classes. But most classi cation models can be extended to more than two classes.
-For example, given physiological characteristics, we can classify animals into mammals or reptiles. Given the words used in an email, we can classify it as a junk email or a legitimate email. Given a credit record and other  nancial data, we can classify a client as trusted for a loan or not.
-Just try the next little example to see a (not-so) obvious problem of classi cation.
+朴素贝叶斯模型机器学习中最出名的分类模型。虽然看上去很简单，但是这个模型非常强大而且只需要很少的精力就可以输出很好的结果。当然，在考虑分类问题的时候我们不应该只局限于一个模型，例如朴素贝叶斯模型，我们还要尝试更多的模型，看看对于特定的数据集哪一种模型是最好的。
+
+分类是机器学习中的一类重要问题，它可以定义为一种关联观察结果和具体类别的任务。假设我们有包含$n$个变量的数据集，并给每一个数据点指认一个类别。这个类别可以是$\{0,1\}$，$\{a,b,c,d\}$，$\{red, blue, green, yellow\}$或$\{warm, cold\}$等。我们会看到有时考虑二元分类问题（问题只涉及两个分类）要更简单。但是大多数分类问题都有超过两种类别。 
+
+例如，给定生理特征，我们可以把动物分成哺乳动物或爬行动物。给定邮件中用到的 单词，我们可以把邮件分成垃圾邮件或正常邮件。给定信用记录和其他财务数据F，我们可以把客户分成贷款可信或者贷款不可信。
+
+尝试接下来的小例子，看看分类的显式展示。
 
 ```{r,eval=F}
 Sigma <- matrix(c(10,3,3,2),2,2)
@@ -2251,37 +2254,45 @@ points(x2,col=3)
 ```
 
 ![](figures/99_1.png)
-This example shows a two-variate classi cation problem with two classes, the red and the green. The two variables are represented as the x axis and the y axis. The problem seems obvious but it is not, because the interface between the red class and the green class is not clearly de ned. This is typical of real-world problems.
-In this case, we can still draw a clear line in the middle to separate the two classes. But sometimes it is not obvious and a line won't work. When a line can separate the two classes we call it linear classi cation. When we need a curvier separation, we call it non-linear separation.
-The way we estimate the quality of a classi er is by looking at the error rate. We want the lowest error rate; that is, every time the classi er predicts a class for a data point, it has to be right. However, depending on the classi cation problem, the error can have a different consequence. For example, in a medical classi cation problem, classifying a patient as ill when he or she is not is presumably less dangerous than classifying the patient as healthy and letting him or her go with an undetected illness.
-Obviously we want the classi er to be as accurate as possible and the general rule when building classi ers is to concentrate entirely on dif cult cases.
+
+这个例子展示了两个变量的二元分类问题。两个变量通过$x$轴和$y$轴表示。问题似乎很明显，事实上并非如此，因为红色类别和绿色类别的分界面定义并不清楚。这就是典型的现实世界的例子。
+
+在这个例子中，我们依然可以在中间画一条直线来分成两个类别。但是有时问题并不明显，一条线也不够用。当一条直线可以分出两种类别时，我们称之为**线性分类问题**。当我们需要一条曲线来区分时，我们称之为**非线性分类问题**。
+
+我们评估分类器质量的方法是看错误率。我们希望最低的错误率，即每次分类器预测数据的类别都应该是正确的。然而，根据分类问题的不同，错误可能意味着不同的结果。例如，在医疗分类问题中，把病人分成得病类别要比分成健康类别或带有未知检出疾病通常要危险小些。
+
+很明显 ，我们希望分类器尽可能准确，构建分类器的通用规则是完全关注于棘手的例子。
 
 ### 表示
 
-The Naive Bayes model is a probabilistic classi cation model with N random variables X as features and one random variable C as the class variable. The main (and very strong) assumption made in this model is that, given the class, the features are independent. This seems to be very strong and surprisingly it gives good results in this situation.
-The join probability distribution in the Naive Bayes model is:
-p(X,C)= p(C)∏N p(Xi |C) i=1
-It is represented by the following graphical model:
+朴素贝叶斯模型是一种概率分类模型，其中$N$个随机变量$X$作为特征，1个随机变量$C$作为类别变量。模型的主要（强）假设是，**给定类别，特征都是独立的**。这个假设看上去很强，而且会给出非常好的结果。
+
+朴素贝叶斯模型的联合概率分布是：
+
+$$ p(X,C)=p(C)\prod_{i=1}^N p(X_i \mid C) $$
+
+它可以使用下列图模型表示：
 
 ![](figures/100_1.png)
 
-This is a very simple graphical model in fact and you can see from the graph why knowing the class will make all feature variables independent of each other.
-Therefore, by using the Bayes rule, given a new data point X' we can compute the most probable class by doing:
-p(c| X′)= p(X′|C)p(C)= p(X′|C)p(C) p(X′) ∑c p(X′|C)p(C)
-To make the problem simpler, we will interpret all the Xi variables, as well as the class variable C, as binary variables. However the theory stays the same if the variables have more than two possible values. In fact, the theory of this model is similar even if you consider continuous features too. For example, for real-value features, we can consider Gaussian distributions and have:
-    p(x|C=c)=∏N N(X|μ,σ2)
-i=1 [ 100 ]
-i ic ic
- 
-Chapter 4
-Here, N represents a Gaussian distribution.
-When the features are binary the result is the same except that one uses the Bernoulli
-distribution for the X features:
-p(x|C=c)= NX|μ,σ2 = θx1−θ1−x ∏N ( )∏N ( )
- i ic ic
-i=1 i=1
-ic ic
-Here, x can take values in {0,1} and θic is the probability for Xi to be one given class c.
+事实上，这是一个非常简单的模型，你可以从图中看到为什么知道类别就会使所有特征变量相互独立。
+
+因此，借助贝叶斯规则，给定新的数据点$X^{\prime}$，我们可以计算最有可能的类别，具体如下：
+
+$$ p(c \mid X^{\prime})=\frac{p(X^{\prime} \mid C)p(C)}{p(X^{\prime})}=\frac{p(X^{\prime} \mid C)p(C)}{\sum_c  p(X^{\prime} \mid C)p(C)} $$
+
+为了使问题简单，我们会把所有$X_i$变量和类别变量$C$当做二元变量。但是理论上多元变量在这个问题中处理起来也是一样的。实际上，如果你考虑连续变量，这个模型的理论也是类似的。例如，对于实值特征，我们可以考虑高斯分布，并有：
+
+   $$ p(x\mid C=c)= \prod_{i=1}^N N(X_i \mid \mu_{ic},\sigma_{ic}^2)$$
+
+这里，$N$表示高斯分布。
+
+当特征是二元的，结果也是一样的，除了$X$特征使用伯努利分布：
+
+$$ p(x\mid C=c)= \prod_{i=1}^N N(X_i \mid \mu_{ic},\sigma_{ic}^2)= \prod_{i=1}^N \theta_{ic}^x (1-\theta_{ic}^{1-x})$$
+
+这里，$x$取值为$\{0,1\}$，$\theta_{ic}$是给定类别$c$下$X_i$的概率。 
+
 
 ### 学习朴素贝叶斯模型
 
