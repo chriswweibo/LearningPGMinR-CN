@@ -2296,31 +2296,33 @@ $$ p(x\mid C=c)= \prod_{i=1}^N N(X_i \mid \mu_{ic},\sigma_{ic}^2)= \prod_{i=1}^N
 
 ### 学习朴素贝叶斯模型
 
-Learning a Naive Bayes model is extremely simple. Recalling what we saw in
-Chapter 3, Learning Parameters, it's very easy to infer that, for each θic, in the case of
-binary features with a binary class variable, θic = Nic where N is the count of 1 Nc ic
-variable Xi when the class is C =c and Nc is the count of class 1.
-As for the class variable, it's even simpler: πc = Nc over N where N is the total number
-of data points.
-The reason for that is the same as in the previous chapter. In order to understand why, we need to write the maximum likelihood of this model. For one data point, the probability is:
-p(xici |θ)=p(ci |π)∏j=1Np(xij |θj)
-Knowing a class can take values in {0,1} only in the case of a binary classi er, we
-have therefore:
-p(xici |θ)=∏πc∏∏p(x |θ )c c c j c ij jc
-And therefore the log-likelihood is
-logp(D|θ)=∑C Nclogπc+∑ N∑ C∑ logp(xij|θjc) c=1 j=1 c=1 i/ci =c
-[ 101 ]
-   
-Bayesian Modeling – Basic Models
-In order to maximize this function, we see that we can optimize each term individually, leading to the simple form we obtained for each parameter. So, naturally, it gives exactly the same results as general graphical models.
-Instead of implementing the model manually, we will use an R package named e1071. If you don't have it yet, you can install and load it by doing:
+朴素贝叶斯模型的学习非常建简单。回忆一下第3章的内容，*参数学习*，我们很容易得到，对于每一个$\theta_{ic}$，在二元特征和二元分类变量下，$\theta_{ic} = \frac{N_{ic}}{N_c}$，其中$N_{ic}$是当$C=c$时变量$X_i$的计数，$N_c$是类别1的计数。
+
+至于类别变量，跟家简单：$\pi_c=N_c$，其中$N$是数据点的总个数。
+
+原因和上一章一样。为了更好的理解，我们需要写出最大似然估计模型。对于一个数据点，概率是：
+
+$$ p(x_ic_i\mid \theta)= p(c_i\mid \pi) \prod_{j=1}N p(x_{ij} \mid \theta_j) $$
+
+知道在二元分类器中类别只可以取$\{0,1\}$值，我们有：
+
+$$ p(x_ic_i\mid \theta)=\prod_c \pi_c^c \prod_j \prod_c  p(x_{ij} \mid \theta_{jc})^c $$
+
+因此对数似然率是：
+
+$$log\;p(D \mid \theta)=\sum_{c=1}^C N_c log \; \pi_c +\sum_{j=1}N \sum_{c=1} C \sum_{i\mid c_i=c} log \;p(x_{ij}\mid \theta_{jc})$$
+
+为了最大化这个函数，我们看到可以分别优化每一个项，以便获得每一个参数的简单形式。因此，很自然的，它输出了和通常图模型一样的结果。
+
+除了手动实现模型，我们会使用名为`e1071`的程序包。如果你还没有安装，可以使用下列代码来完成：
 
 ```{r,eval=F}
 install.packages("e1071")
 library(e1071)
 ```
 
-This provides a full implementation of the Naive Bayes model. We can now load data and look at some results:
+这个程序包提供了朴素贝叶斯模型的完整实现。我们可以加载数据并查看结果：
+
 ```{r,eval=F}
 data(iris)
 model <- naiveBayes(Species~.,data=iris)
@@ -2355,15 +2357,16 @@ Y             [,1]      [,2]
   virginica  2.026 0.2746501
 ```
 
-This example needs a bit of explanation. The laplace parameter controls the Laplace smoothing of the data, in order to help the model when data is not perfectly balanced or the dataset exhibits problematic situations. We will come back to this problem later, but it's one of the main problems one has to deal with in most classi cation problems.
-By using this model and trying to predict (or infer) the class, we obtain the following:
+我们再解释一下这个例子。参数`laplace`控制数据的拉普拉斯平滑，以便处理数据并不完美平衡或数据集有问题的情形。我们后边会再回到这个问题，但是这是大多数分类问题都必须处理的一个主要问题。
+
+使用这个模型并尝试预测（或推断）类别，我们有：
 
 ```{r,eval=F}
 p <- predict(model,iris)
 hitrate <- sum(p == iris$Species) / nrow(iris)
 ```
 
-And we obtain a hit rate of 0.96, as 96% of the data points were correctly classi ed. It's great but bear in mind that we use the training dataset to compute this percentage. You can't estimate the real power of a classi cation model using only data points you used to train the model. Ideally, we should split the dataset in two; let's say we will use 1/3 to test it and 2/3 to train the model. Ideally, the split has to be done randomly:
+我们得到了 0.96的命中率，即96%的数据点都被正确分类。这还不错，但是需要记得我们使用了训练集得到这个百分比。你不能只是用训练集中的点来评估分类模型的真正能力。理想情况下，我们应该把数据集分成两部分，假设我们使用$1/3$的数据进行测试，$2/3$的数据进行模型训练。这种分割需要以随机的方式完成：
 
 ```{r,eval=F}
    ni <- sample(1:nrow(iris),2*nrow(iris)/3)
@@ -2372,14 +2375,15 @@ And we obtain a hit rate of 0.96, as 96% of the data points were correctly class
    p <- predict(model,iris[no,])
 ```
 
-Here, ni and no are a list of data point indices taken at random from the initial dataset.
+这里，`ni`和`no`是从初始数据集随机得到的数据点索引列表。
 
+### 完全贝叶斯的朴素贝叶斯模型
 
-### Bayesian Naive Bayes
+尽管名字叫贝叶斯，但是这个模型并不是真正的贝叶斯模型。要使模型具有完整意义的贝叶斯属性，我们应该在参数上建立先验概率。 在朴素贝叶斯模型中，参数是指类别变量$\pi_c$和特征变量$\theta_i$。这些参数使用最大似然法进行估计。但是如果数据集不够平衡怎么办？如果针对特定的类别数据点不够多，参数如何处理？我们会得到很差的估计，最坏的情况是异常表示的参数权重都是0。这显然不是我们期望的，因为结果完全是错误的。我们给正常特征和分类分配了太多的权重，而对异常表示的参数没有分配权重。
 
-This model, despite its name, is not a Bayesian model. To be fully Bayesian we should express prior on the parameters. In the Naive Bayes model, the parameters are those of the class variable πc and those of the feature variables θi. These parameters have been estimated using a maximum likelihood method but what happens if the dataset is unbalanced? What will happen to the parameters if the dataset lacks enough points for a certain number of cases? We will end up with very bad estimators and in the worst case we will have zeros for the ill-represented parameters. This is obviously something we don't want because the results will be completely false, giving too much importance to the features' values or classes and none to the rest.
-This problem is called over- tting. And one simple solution to over- tting is to use a Bayesian approach and include extra information in the model to say, "If the data is not represented, then let's assume it has a very small probability but not a zero probability."
-One elegant and simple solution to this problem is to use prior distributions on the parameters of the model and develop the model in a Bayesian way. Let's make a few assumptions in order to simplify the calculus. First of all, we will assume that all the feature variables have the same  nite number values. We will call this number S. You can easily generalize this to any number of values for each feature, but in our presentation it makes things simpler. Then we will assume we can use a factored prior on the θ feature parameters, as follows:
+这个问题叫做**过拟合**（over-fitting）。过拟合的解决可以使用贝叶斯方法，并在模型中包含额外信息，比如“如果数据没有表示出来，可以假设它们有很小的概率，而不是零概率”。
+
+一种简便易行的方法是使用模型参数的先验概率，并使用贝叶斯的方式开发模型。让我们做一些假设来简化计算。首先，我们假设所有恶天恒办理 First of all, we will assume that all the feature variables have the same  nite number values. We will call this number S. You can easily generalize this to any number of values for each feature, but in our presentation it makes things simpler. Then we will assume we can use a factored prior on the θ feature parameters, as follows:
 p(θ)=p(π)∏N ∏C p(θic) i=1 c=1
 Here, θ represents all the parameters. In order to make it clear, we use the following notation:
 
