@@ -2409,62 +2409,69 @@ $$p(\theta)=p(\pi)\prod_{i=1}^N \prod_{c=1}^C p(\theta_{ic})$$
 * 当然，我们还知道特征变量服从类别或多项式分布。
 * 因此，通过数据计算，$X_i$分布的参数后验概率也服从狄利克雷分布$Dir(N_i+\alpha)$，其中$N_i$是计数，和之前的工作一样！由于是一种变形形式，过程很简单。
 
-So  nally, if we want to incorporate the Dirichlet prior into our computations, the posteriors of the parameters for the class variable are:
-πc=Nc+αc whereα0=∑αc. N +α0 c
-And the prior distribution of π is a Dir(⍺) where ⍺ = (⍺1, ...,⍺c).
-For the parameters of the feature variables, the solution is exactly the same:
-  θ(s) = Nic +βs
-ic Nc +β0 where β0 =∑s βs
- [ 105 ]
- 
-Bayesian Modeling – Basic Models
-And the prior distribution of θic is a Dir(β), where β = (β1, ..., βs).
-Wait! Is it really as simple as this? Well, yes it is, thanks to the conjugacy in this
- Bayesian model. If you look carefully at the formulas, you will see that none of the π and θ(s) can be equal to zero now because of the values of α and β. Indeed, in
-c ic
-the de nition of the Dirichlet distribution, it is required that the parameters of the Dirichlet should be strictly positive.
-So the last problem we need to solve is choosing a value for α and β. One common choice is to take 1 for all of them. In terms of Dirichlet distributions, it means we choose a uniform prior for all the parameters of the class and feature variables. It means we will allow our parameters to take any value with equal probability except of course
-0. Choosing different values for α and β will lead to different form results. We can
-try to promote certain values by pushing the Dirichlet distribution in one direction or another; or, on the contrary, we can try to keep all parameters with similar values.
-If you choose 1 for the Dirichlet parameter, you will obtain something called Laplace smoothing, which we saw before in the naiveBayes function of the e1071 R package. Sometimes, it is also called a pseudo-count because it could be seen as arti cially adding one example of any case to your dataset.
-But the Dirichlet prior is not the only possible prior we can use. In the case of binary variables, another distribution of interest is the Beta distribution. In the next section we will present more formally the Beta-Binomial model and see its relation to the Dirichlet-Multinomial model we just saw. We will see that the results are similar and also how to play with the parameters of the Beta distribution in order to describe different types of prior for our class and feature variables.
+因此，如果我们希望把狄利克雷先验概率放到计算中，类别变量参数的后验概率就是：
 
-## Beta-Binomial
+$$\pi_c=\frac{N_c+\alpha_c}{N+\alpha_0}，其中\alpha_0=\sum_c\alpha_c。$$
 
-The Beta-Binomial prior is another example and a well-known model where we set a prior distribution on the parameter of the distribution of interest. Here we are going to use a binomial distribution with a θ parameter. The θ parameter can be seen as a probability that an event will occur or not, or a proportion of the positive events in a sequence of experiments. Therefore, the parameter θ takes values in [0,1].
-Let's  rst review the Binomial distribution with a simple example: let's say we have a coin and we want to know if the coin is impartial or not when we play the heads or tails game. The game is to toss the coin N times and try to estimate what is the probability θ of obtaining a head. This problem is very important because it is the basis of many other models. You can replace the game of heads or tails with the result of experimentation (positive or negative), the result of a poll (yes or no), or any other binary answer.
-[ 106 ]
-  
-Chapter 4
-Historically, this model has been studied by Thomas Bayes and generalized by Laplace, thus giving birth to the Bayes rule (or more formally the Bayes-Laplace, as we saw in Chapter 1, Probabilistic Reasoning).
-In this problem we will follow again a Bayesian approach: we need a prior distribution on the parameter θ, a likelihood of the data given the parameter p(x | θ), and we will compute the posterior distribution p(θ | x).
-If we want to be complete, we can also compute the predictive posterior distribution p(x | θ, x), which is the distribution of a new data point (a new toss) given parameters and the previous experiments.
-When we assume that all the observations (that is, the results of each toss) are independently and identically distributed we can again write that:
-p(D|θ)=∏N p(xi |θ) i=1
-Here, D = {x1, ..., xN} is the dataset.
-Is this assumption true? From a theoretical point of view, it's true because: (1) every time we toss a coin, the previous toss has no in uence on the new one and (2) we
-use the same coin for all the tosses, so the parameter θ doesn't change. Therefore the distribution of heads and tails is the same. But is it true in real life? If we assume that each toss can microscopically change the air in the room and that each toss will rip off a few atoms of metal from the coin, then the distribution is certainly not independent and certainly not identical. But in fact the acute reader will have understood that those effects are so negligible that they have absolutely no in uence on the results. Maybe one should toss the coin a few billion times to start seeing a difference.
-However, when designing such an experiment, one has to be careful about the conditions of the experimentation and be sure that the data is indeed identically and independently distributed. For example, if the experiment is a poll and one puts the same question to people next to each other, one after the other, it is very likely that the second person will be in uenced by the answer of the  rst one. And therefore the data will not be iid anymore.
-Now we can star solving our Bayesian problem by assuming distributions for all the required components.
-[ 107 ]
-   
-Bayesian Modeling – Basic Models
-The Bernoulli distribution is a probability distribution that gives the probability θ
-to a random variable when it takes the value 1 and (1 –θ) if it takes the value 0. We say that x ~ Ber(θ), that is p(x | θ) = θx(1 – θ)1-x with x ε {0,1}. If we repeat the same Bernoulli experiment many times (that is, if we toss the coin many times), we obtain the dataset D = {x1, ..., xN} with this probability distribution:
-∏N 1−x 1−x 1−x p(D|θ)= p(x |θ)=θx1 (1−θ) 1 θx2 (1−θ) 2 ...θxN (1−θ) N
-Because of the iid assumption and the fact that the product is commutative, and if we call N1 the number of heads and N0 the number of tails, we can rewrite this likelihood by:
-p(D|θ)=θN1 (1−θ)N0 From now on, we can take the log of this expression:
-LL(θ)=logθN1 (1−θ)N0 =N1logθ+N0log(1−θ)
-Before going further, it's interesting to understand why we are always using logarithms in our computations. The  rst reason is historical: probabilities are numbers between 0 and 1. Multiplying two probabilities is essential when computing the likelihood of iid data. In fact, in such a likelihood, it's not unusual to multiply hundreds or thousands of those probabilities. On early computers, multiplication
-was very slow compared to addition. Because log(a.b)= log(a)+log(b), it was useful to  rst transform all the data into logarithms and then add them. It was generally faster. Nowadays, this is not true anymore and usually multiplication can be (almost) as fast as addition. The cost of computing the logarithm can sometimes overwhelm the small gain of just doing additions instead of multiplications.
-The second reason is that, when we multiply numbers between 0 and 1, the result tends to decrease and be smaller and smaller. This time, even modern computers have a limited capacity to represent numbers and moreover, because real values are discretized (usually following the IEEE-754 norm), the accuracy of computations suffers enormously and errors are accumulated throughout the computations, leading to very inaccurate if not false results. However, with logarithms, numbers between -∞ and 0 are added together, making the computations more accurate. Small values are now contributing a lot to the results, making computations accurate.
-[ 108 ]
- i=1
-i
-  
-Chapter 4
-Usually we take the negative log-likelihood, and we only have to deal with positive numbers. The other reason is that, when one wants to maximize the likelihood, one can also minimize (towards zero) the negative log-likelihood. This is an equivalent problem. And a lot of optimization algorithms try to  nd the zeros of functions. Therefore implementation is simpler.
-To illustrate this, just plot the following in R:
+$\pi$的先验概率是$Dir(\alpha)$，其中$\alpha=(\alpha_1,...,\alpha_c)$。
+
+对于特征变量的参数，方法也一样：
+
+$$\theta_{ic}^{(s)}=\frac{N_{ic}+\beta_s}{N_c+\beta_0}，其中\beta_0=\sum_s\beta_s。$$
+
+$\theta_{ic}$的先验概率是$Dir(\beta)$，其中$\beta=(\beta_1,...,\beta_s)$。
+
+
+稍等，事情就这么简单吗？是的，这都得益于这个贝叶斯模型的共轭性。如果我们仔细看一下这些公式，我们会发现因为$\alpha$和$\beta$的取值，$\pi_c$和$\theta_{ic}^{(s)}$都不会等于0。事实上，根据狄利克雷分布的定义，它的参数都应该为正。
+
+最后的问题是选择$\alpha$和$\beta$的取值。通常，二者都会取1。从狄利克雷分布的角度讲，这意味着我们给类别和特征变量都选择了均匀分布。我们可以允许参数等概率的选取任何值，除了0。选择不同的$\alpha$和$\beta$值会产生不同的结果。我们可以改变狄利克雷分布的两个方向，尝试输入不同的值，或者我们也可以保持所有的参数都取一样的值。
+
+如果狄利克雷分布的参数取1，那么会得到名为拉普拉斯平滑的公式。这就是我们之前在`e1071`程序包的函数`naiveBayes`中看到的。有时，它也叫作伪计数（pseudo-count），因为它可以看做是手动给数据集添加一个例子。
+
+但是狄利克雷先验概率并不是唯一可用的概率。在二元变量中，另一种有意义的分布是Beta分布。在下一节中，我们会更正式的介绍Beta二项式分布，并给出它与狄利克雷多元分布的关系。我们会看到最终结果很类似，以及如何处理Beta分布的参数，以便描述类别和特征变量的不同类型的先验概率。
+
+## Beta二项式分布
+
+Beta二元先验概率是另外一个著名的模型，我们可以在模型上给一个分布的参数设定一个先验分布。这里，我们打算使用带有参数$\theta$的二项式分布。参数$\theta$可以看作是事件发生与否的概率，或者试验序列中正面事件的占比。因此，参数$\theta$取值在$[0,1]$之间。
+
+首先用几个简单的例子回顾一下二项式分布：假设我们有一枚硬币，我们希望知道在玩猜正反面的游戏中硬币公平与否。这个游戏需要投掷N次硬币，并尝试估计得到正面的概率$\theta$。这是一个很重要的问题，因为它是许多其他模型的基础。你也可以使用其他试验数值代替正面和反面，例如，正负试验结果，民意调查结果，或其他二元答案。
+
+历史上，这个模型已经被Thomas Bayes研究过，并由Laplace推广泛化，由此产生贝叶斯规则（或更加正式的叫Bayes-Laplace规则, 如第1章概率推理中的介绍）。
+
+在这个问题中，我们会继续遵循贝叶斯的方法：我们需要参数$\theta$的**先验分布**，**给定参数下的似然率**$p(x \mid \theta)$，然后计算后验概率$p(\theta \mid x)$。
+
+如果我们考虑问题的完备性，我们也可以计算预测性的后验概率$ p(x \mid \theta, x)$。它表示给定参数和之前试验结果下新的数据点（投掷试验）的概。
+
+当我们假设所有的观察结果（即每次投掷的结果）是相互独立同分布的，我们还可以写成：
+
+$$ p(D \mid \theta)= \prod_{i=1}^N p(x_i \mid \theta) $$
+
+这里$D = \{x_1, ..., x_N\}$是数据集。
+
+这个假设是否正确呢？从理论的角度讲，它是正确的。原因有两个：(1) 我们每次投掷硬币，之前的投掷对新的投掷结果没有影响。(2)我在所有的投掷中都是用同一枚硬币，因此参数$\theta$不会改变。所以出现正面和反面的概率是相同的。但是在现实世界中，是否仍然正确呢？如果我们假设每次投掷都可以微小的改变屋内的空气流动，而且每次投掷都会擦掉一些金属原子，那么分布当然不是独立的，也不是相同的。事实上敏锐的读者已经理解这些影响可以完全忽略，对结果绝对不会有影响。也许我们应该投掷几十亿次才会看到一些差异。
+
+然而，在设计这样一个实验时，我们需要格外注意实验的条件，确保数据的确独立同分布。例如，如果实验是一项民意调查，我们对相互紧邻的每个人提出相同的问题，那么第二个人很有可能受第一个人回答的影响。这种情况下，数据就不是独立同分布。
+
+现在我们可以假设所需模块的分布情况，解决贝叶斯问题了
+
+伯努利分布是另一种概率分布。它需要给出随机变量的概率$\theta$，对应变量取1的情形，以及$1-\theta$对应变量取0的情形。我们说$x \sim Ber(\theta)$, 即$p(x \mid \theta) = \theta^x(1 – \theta)^{1–x}$。其中$x \in \{0,1\}$。如果我们多次重复伯努利实验（即，多次投掷硬币），我们还会得到带有概率分布的数据集$D = \{x_1, ..., x_N\}$：
+
+$$ p(D \mid \theta)= \prod_{i=1}^N p(x_i \mid \theta)=\theta^{x_1}(1-\theta)^{1-x_1}\theta^{x_2}(1-\theta)^{1-x_2}\ldots \theta^{x_N}(1-\theta)^{1-x_N} $$
+
+由于独立同分布的假设和乘积的可交换性，如果我们记$N_1$为正面向上的次数，$N_0$为反面向上的次数，我们可以重写这个似然率：
+p$$ p(D \mid \theta)= \theta^{N_1}(1-\theta)^{N_0} $$
+
+现在，我们可以对表达式取对数：
+
+$$LL(\theta)=log \; \theta^{N_1}(1-\theta)^{N_0}=N_1 log \; \theta +N_0 log\; (1-\theta)$$
+
+在继续讲解之前，我们有必要解释一下为什么在计算中总是使用对数。第一个原因是历史原因：概率是0到1之间的数。计算独立同分布数据的似然性需要两个概率相乘。事实上，成百上千个概率相乘，这样的似然率并不罕见。早期的计算机做乘法要比做加法慢得多。因为$log(ab)= log(a)+log(b)$，把所有数据转换成对数然后再做加法会很有用。计算速度通常变得更快。如今，情况大大改观，乘法和加法的处理速度几乎相同。计算对数的花销有时甚至大大超出改用加法带来的收益。
+
+第二个原因是当我们对0和1之间的数做乘法时，结果会变得越来越小。即使是现代计算机，处理数字的能力也是有限的。而且实际数值也是经过离散化的（通常按照IEEE-754规范），计算的精度会受到比较大的影响，而且误差会随着计算次数积累，最终导致很不准确的结果。但是，使用对数，负数加在一起可以使计算更精确，较小的数值对最终结果贡献更大，保证结果的准确新。
+
+通常，我们会采用负对数似然率，只需要处理正数。另一个原因是，当我们希望最大化似然率时，我们也可以最小化负对数似然率。这是等价的问题。许多优化问题都试图找出函数的零值（最小值）。因此采用负对数似然率实现起来更简单。
+
+为了详细说明这个思想，只需用R画出下列图形：
 
 ```{r,eval=F}
 x <- seq(0,1,0.05)
@@ -2472,32 +2479,28 @@ plot(x, -log(x), t='b', col=1)
 ```
 
 ![](figures/109_1.png)
-After this parenthesis, we are back to the problem of a sequence of tosses. So we assumed that the random variable representing the result of a toss has a Bernoulli distribution and we calculated the likelihood of a sequence of N tosses.
-Now let's consider the problem from a different angle and let's assume we toss the coin N times, N being known in advance. The question is now: what is the probability of obtaining N1 heads out of N tosses.
-[ 109 ]
-    
-Bayesian Modeling – Basic Models
-On average, the answer will depend on how the coin is biased. And the bias of the coin is known too; it is the parameter θ. If θ = 0.5, then N1 should rather be N2 . We
-want to have a probability for each possible value that could take N1 in the function of θ and N. In this case, it is important to remark the following: how many positive cases do we have? By positive cases, we mean, How many sequences of N tosses can provide N1 heads? On a small example with N=3 and N1 =2, we can have {HHT, HTH, THH}. That is three possibilities. In general, we want to know the number
-of combinations of r values out of n events with replacement. And this is equal to
-p(N|θ,N)=⎛N1+N0⎞θN (1−θ)N0 10⎜N⎟1
-  ⎛ n ⎞ = n! ⎜r⎟ r!(n−r)!
-. Now remember that each sequence is independent of the others and that the probability of two independent events is the sum of probability
- ⎝⎠
-P(A ⋁ B) = P(A) + P(B). So  nally, the probability of N =⎛n⎞ independent Bernoulli
-1 ⎜r⎟ events of parameter θ is: ⎝ ⎠
-This probability distribution is very well-known and is called the Binomial distribution. In fact, the Binomial distribution is usually de ned with two parameters: N, the total number of tosses, and θ. It is commonly written as:
-p(n|θ,N)=⎛N⎞θn (1−θ)N−n ⎜n⎟
-⎝1⎠
+
+我们回到投掷硬币的问题。我们假设了表示投掷结果的随机变量服从伯努利分布，并计算了N次投掷序列的似然率。
+
+现在我们从另一个角度考虑这个问题。假设我们投掷了N次硬币，N是提前知道的。问题就变成了：$N$次投掷中得到$N_1$次正面向上的概率。
+
+通常这个答案取决于硬币的“偏心”程度。通常，硬币的“偏心”程度也是已知的，是参数$\theta$。如果$\theta= 0.5$，那么$N_1$应该是$\frac{N}{2}$。我们希望对于任意可能的值$N_1$，我们都可以在函数中使用$\theta$和$N$计算出概率。这种情况下，注意以下问题：我们有多少正例？也就是说，$N$次投掷给出$N_1$次正面向上的序列有多少？在小型实验中，例如$N=3,N_1 =2$,我们有$\{HHT, HTH, THH\}$。这是三种可能。通常我们需要知道，$n$次带有放回的事件中，$r$值的组合数量。这个数量
+$\bigl( \begin{smallmatrix} n \\ r \end{smallmatrix} \bigr)=\frac{n!}{r!(n-r)!}$。主要每个序列都是相互独立的，以及两个独立事件的概率等于概率之和$P(A \vee B) = P(A) + P(B)$。最终，参数$\theta$的$N_1=\bigl( \begin{smallmatrix} n \\ r \end{smallmatrix} \bigr)$个独立伯努利事件概率是：
+
+$$p(N_1 \mid \theta,N_0)= \bigl( \begin{smallmatrix} N_1+N_0 \\ N_1 \end{smallmatrix} \bigr) \theta^{N_1}(1-\theta)^{N_0}$$
+⎝ ⎠
+这个概率分布非常著名，叫做**二项式分布**（Binomial distribution）。事实上 ，二项式分布通常由两个参数定义：$N$，投掷总数，以及$\theta$。通常写作：
+
+$$p(n \mid \theta,N)= \bigl( \begin{smallmatrix} N \\ n \end{smallmatrix} \bigr) \theta^n(1-\theta)^{N-n}$$1⎠
 ⎝⎠
-In R, the binomial distribution is provided by default in the language and it can be used with the following functions:
+R语言默认提供二项式分布的实现，可以使用下列函数：
 
-* dbinom: Density
-* pbinom: Cumulative
-* qbinom: Quantile
-* rbinom: Random generation
+* `dbinom`: 密度
+* `pbinom`: 累计
+* `qbinom`: 分位数
+* `rbinom`: 随机数生成
 
-We can illustrate the distribution of the binomial in R with the little program that follows:
+我们可以使用R语言，通过下面简单几行程序给出二项式分布：
 
 ```{r,eval=F}
 x<-seq(1,20)
@@ -2508,46 +2511,55 @@ lines(x,dbinom(x,20,0.1),t='b',col=3)
 
 ![](figures/111_1.png)
 
- We show three different distributions with the parameter θ varying from 0.1 to 0.5. When θ is small, obviously the probability of having many positive outcomes quickly decreases. When θ is 0.5, the black curve shows that the probability of 50% positive outcomes is obviously the highest.
+我们展示了0.1到0.5之间三个不同参数$\theta$下的分布。当$\theta$很小，正例输出的概率迅速减少，当$\theta$是0.5时，黑色曲线表名50%的正例输出明显是最高的。
 
 ### 先验分布
 
-The next question that arises is, What prior distribution should we use as a prior on θ? The beta distribution is a very common choice and has the nice property of being a conjugate to the Binomial and Bernoulli distributions.
-In fact the beta distribution has a very nice form, similar to the Binomial and Bernoulli distributions, as follows:
-p(θ |α,β)∝θα−1 (1−θ)β−1
-[ 111 ]
-  
-Bayesian Modeling – Basic Models
-We will add the normalization constant later. The good thing about the Beta is
-that its domain, that is, the value that θ can take, is [0,1]. And therefore θ from the Beta distribution can also be interpreted as a proportion or a probability and used as a parameter in the Binomial or Bernoulli distributions. This makes the Beta distribution a perfect candidate for the prior distribution. To complete the formula we have to realize that this distribution is a density and the integral over its domain must be one. Therefore it is usual to write:
-θα−1 (1−θ)β−1 p(θ |α,β)= ∫1 xα−1 (1−x)β−1 dx
-0
-And the integral at the denominator is known as the Beta function. In general we can simply write the density as:
-p(θ |α,β)= 1 θα−1 (1−θ)β−1 = Γ(α +β) θα−1 (1−θ)β−1 Beta(α,β) Γ(α)Γ(β)
-Here, the Gamma function is de ned as:
-Γ(x)= ∫∞ exp(−t)tx−1dt 0
-When x is an integer Γ(x)=(c−1)!
+接下来的问题是，我们应该对$\theta$使用什么样的先验分布。Beta分布是常见的选择，它有非常好的属性，可以作为二项式分布和伯努利分布的共轭分布。
+
+Beta分布具有很好的形式，类似于二项式分布和伯努利分布：
+
+$$p(\theta \mid \alpha, \beta) \propto \theta^{\alpha-1}(1-\theta)^{\beta-1}$$
+
+后面我们会加上归一化常数。Beta分布的好处是它的值域，即$\theta$的只在$[0,1]$内。因此Beta分布的$\theta$可以理解成占比或概率，用作二项式分布和伯努利分布的参数。这使得Beta分布成为先验分布的完美候选。 要完整写出公式，我们需要注意这个分布是密度分布，值域上的积分必须是1。因此通常写作：
+
+$$p(\theta \mid \alpha,\beta)=\frac{\theta^{\alpha−1} (1−\theta)^{\beta−1}}{\int^1_0 x^{\alpha−1} (1−x)^{\beta−1}dx}$$
+
+分母上的积分就是Beta函数。通常我们可以把密度函数写作：
+$$p(\theta \mid \alpha,\beta)=\frac{1}{Beta(\alpha,\beta)} \theta^{\alpha−1} (1−\theta)^{\beta−1}= \frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}\theta^{\alpha−1} (1−\theta)^{\beta−1}$$
+
+这里Gamma函数定义如下：
+$$\Gamma(x)=\int^\infty_0 exp(-t)t^{x-1}dt$$
+
+当$x$是整数时，$\Gamma(x)=(c-1)!$
 
 ### 带有共轭属性的后验分布
 
-Now we need to combine the Binomial distribution with the Beta prior to obtain the posterior distribution. The posterior distribution is obtained by applying the Bayes rule as usual:
-p(θ|N,n,α,β)= p(n|N,θ)p(θ|N,α,β)∝p(n|N,θ)p(θ|N,α,β) p(n| N,α,β)
-[ 112 ]
-      
-Chapter 4
-And  nally, by replacing each distribution with its analytical form, we obtain:
-p(n| N,θ)p(θ | N,α,β)= N! θn (1−θ)N−n ×Γ(α)Γ(β)θα−1 (1−θ)β−1 n!(N −n)! Γ(α +β)
-And this is simply proportional to:
-θn (1−θ)N−n ×θα−1 (1−θ)β−1 =θn+α−1 (1−θ)N−n+β−1
-And in fact the last form is exactly the same as the initial form of the Beta
-distribution. It means that our posterior distribution on θ is also Beta-distributed. Therefore, we have found our posterior and we can resume this calculus as follows:
-If n follows a Binomial distribution Binomial(θ, N) and the prior distribution over θ is Beta(α, β), then the posterior distribution on θ will also be a Beta distribution Beta(⍺ + n, β+ N – n).
-In this case, thanks to the conjugacy property, we've made a very ef cient posterior computation, which boils down to a few additions only. The notion of conjugacy is extremely important in Bayesian reasoning mainly for this property.
+现在我们需要把二项式分布和Beta先验分布结合起来，获取后验分布。后验分布可以使用贝叶斯规则得到：
+
+$$p(\theta|N,n,\alpha,\beta)= \frac{p(n|N,\theta)p(θ|N,\alpha,\beta)}{p(θ|N,\alpha,\beta)} \propto p(n|N,\theta) p(n| N,\alpha,\beta)$$
+
+最终，通过解析形式替代每一个分布，我们有：
+
+$$p(n|N,\theta) p(n| N,\alpha,\beta)=\frac{N!}{n!(N-n)!} \theta^n(1-\theta)^{N-n} \times \frac{\Gamma(\alpha)\Gamma(\beta)}{\Gamma(\alpha+\beta)} \theta^{\alpha-1}(1-\theta)^{\beta-1}$$
+
+这个结果正比于：
+
+$$\theta^n(1-\theta)^{N-n} \times \theta^{\alpha-1}(1-\theta)^{\beta-1} = \theta^{n+\alpha-1}(1-\theta)^{N-n+\beta-1}$$
+
+事实上，最后的形式与Beta分布的初始形式相同。这意味着$\theta$的后验分布也是Beta分布。
+
+因此我们已经找到了后验分布，可以继续如下计算：
+
+如果$n$服从二项式分布$Binomial(\theta, N)$，$\theta$的先验概率是$Beta(\alpha,\beta)$, 那么$\theta$的后验概率也是Beta分布$Beta(\alpha + n, \beta+ N – n)$。
+
+在这个列子中，得益于共轭属性，我们执行了非常高效的后验概率计算，它只需要做一些加法。共轭的思想在贝叶斯推理中非常重要。
 
 ### 如何选取Beta参数的值
 
-This will depend on what type of information we want to include in the model. For example, we might decide that every value of θ is a priori acceptable and we want to give the same importance to all of them. This is what we did with the Dirichlet distribution in the previous section when adding pseudo-counts of 1.
-With the Beta distribution, we can have a uniform distribution with the parameters Beta(1,1). But we can also try to give more importance to extreme values close to 0 or 1, with for example a Beta(0.5,0.5) distribution. On the other hand, to force θ to stay more centered around 0.5, we can use Beta(2,2), Beta(3,3). The higher the values, the more probability mass is given to the center. The next code in R shows different distributions with different values:
+这取决于我们希望在模型中包含哪种类型的d信息。例如，我们可能会认为每一个$\theta$的值都是先验可接受的，并且希望赋予每一取值相同的重要度。这就是之前章节中狄利克雷函分布的意义，其中添加了取值为1的伪计数。
+
+使用Beta分布，我们可以由$Beta(1,1)$得到均匀分布。但是我们也可以使用$Beta(0.5,0.5) $尝试给靠近0或1的极值赋予更大的重要度。另一方面，要使$\theta$保持在0.5附近，我们可以使用$Beta(2,2)$, $Beta(3,3)$。值越大，靠近中心的概率越大。下面的R代码给出了不同值下的分布情况：
 
 ```{r,eval=F}
    x <- seq(0,1,length=100)
@@ -2577,36 +2589,47 @@ for(p in param)
 
 ## 高斯混合模型
 
-The Gaussian mixture model is the  rst example of a latent variable model. Latent variables are also called hidden variables and are variables that are present in the model but are never observed.
-The notion of using unobserved variables can be surprising at  rst because we might wonder how to estimate the parameters of the distribution of such a variable. In fact, we might wonder what the real meaning of such a latent variable is.
-For example, let's say we observe data represented by a group of random variables. This data tends to group into clusters, aggregating together depending on their underlying meaning. For example, we could observe physiological traits from animals and group those data points by species such as dogs, cats, cows, and so on. If we think in terms of generating models, then we can say that, by choosing a group such as for example pony, we will observe features that are speci c to this group and not to another group such as cats. However, none of the physiological variables carry an explicit reference to the fact that they come from the pony group or the cat group.
-This distinction only exists because we want to group things together but they're not part of the real world. However, it helps a lot to group data like this, by pony or cat features, to understand animals in general. This is the grouping we want to do with a latent variable.
-Using latent variables in a model can be problematic at  rst because there is no data to estimate their distribution. However, we saw before that algorithms such as EM can be very helpful when it comes to solving this task.
-Moreover, we can simplify the model by introducing some conditional independence between features or a hierarchy between variables, thus making the model easier to interpret or easier to compute.
-The Gaussian mixture model is a latent variable mainly used for density estimation problems, where, roughly speaking, the main assumption is that a random process will, according to a multinomial distribution, choose a Gaussian at random and then (according to this selected Gaussian distribution) choose a data point at random. It is a very simple 2-step process. And it also simpli es the problem of estimating a complex dataset distribution. Instead of searching for a very complex distribution, the model estimates it with a set of simple Gaussian distributions, joined by the latent variable. It is similar to a divide-and-conquer approach.
+高斯混合模型是隐变量模型的第一个实例。隐变量也叫做隐含变量，是指存在与模型中但是从来都观察不到的变量。
+
+使用非观测变量的思想可以带来意想不到的好处。我们希望知道如何估计变量的分布参数。事实上，我们还想知道隐变量的真是含义是什么。
+
+例如，假设我们观察到由一组随机变量表示的数据。这个数据可能会聚成几个簇，并根据内在的含义聚合起来。再比如，我们可能观察到动物的生理学特点，并按照物种把数据点分成例如狗，猫，牛等。如果我们考虑生成模型，我们可以说，通过选择分组，例如马，我们会观察到针对这个分组的特征，而不是其他分组例如猫的特征。但是，任何一个生理学变量都不会带有明确的信息，说明自己来自于马分组或是猫分组。 
+
+这种区别存在的原因在于，我们想把类似的东西分到一起，但是它们并不是现实世界的局部。然而这种情形确实有利于我们根据马或猫的特征对此类数据分组，进而理解动物群体。这就是我们希望使用隐变量进行分组的过程。
+
+一开始就使用模型中的隐变量会比较棘手，因为没有数据可以来估计分布。但是之前，我们看到诸如期望最大化算法解决这类问题很有用
+
+而且，我们可以通过引入一些特征间的条件独立假设或变量之间的层次关系，来简化模型，使得模型更加易于理解或计算。
+
+高斯混合模型中隐变量主要用来估计密度。简单地说，其中的主要假设是，随机过程会依据多项式分布，随机选择一个高斯分布，然后再（根据选择的高斯分布）。这是一个很简单的两步过程，同时也简化了对复杂数据集分布的估计问题。它并不会找出一个非常复杂的分布，相反，模型会使用简单的高斯分布集合来估计，这些分布通过隐变量关联在一起。折痕类似于分而治之的思想。
 
 ### 定义
 
-In this model we will call X the variable we can observe and we will call Z a multinomial random variable that is hidden. The model is de ned by the following probability distribution:
-p(X |Θ)=∑i p(Zi =1|πi )p(X |Zi =1,θi ) = ∑iπip(X|Zi =1,θi)
-Here, πi are the mixing proportions and p(X | Zi = 1, θi) are the mixture components. In this formula, because Z is a multinomial distribution, we have p(Zi | πi) = πi and Zi is the ith component of Z.
-Finally Θ is the set of all parameters of the model and θi are the parameters of the X variables.
-When X has a Gaussian distribution, we can write the preceding distribution as: p(X |Θ)=∑iπiN(X |θi =(μi,∑i ))
-Here, Σi are the covariance matrices of the variable X. If we expand the formula we obtain:
-graphical model and see the equivalence in it:
+在这个模型中，我们记$X$为可观测的变量，$Z$是隐含的多项式随机变量。模型使用如下概率分布定义：
+
+$$p(X \mid \Theta)=\sum_i p(Z_i=1 \mid \pi_i)p(X \mid Z_i=1,\theta_i)=\sum_i \pi_i p(X \mid Z_i=1,\theta_i)$$
+
+
+这里$\pi_i$是**混合占比**，$p(X \mid Z_i=1,\theta_i)$是**混合成分**。在这个公式中，因为$Z$是多项式分布，我们有$p(Z_i | \pi_i) = \pi_i$,$Z_i$是$Z$的第i个成分。
+
+最终，$\Theta$是所有模型参数的集合，$\theta_i$是变量$X$的参数。
+
+当$X$服从高斯分布，我们可以把之前的分布写成： 
+
+$$p(X \mid \Theta)=\sum_i \pi_iN(X \mid \theta_i=(\mu_i,\sum_i))$$
+
+这里，$\sum_i$是变量$X$的协方差 矩阵。如果我们把公式展开，可以得到
+
+$$p(X \mid \Theta)=\sum_i \pi_i \frac{1}{(2\pi)^{m/2}\lvert \sum_i \rvert^{1/2}}exp(-\frac{1}{2}(x-\mu_i)^T \sum^{-1}_i (x-\mu_i))$$
+
+这个结果看起来很复杂，让我们画出相应的概率图模型，看看其中的等价概念：
 
 ![](figures/116_1.png)
-This represents the probability distribution P(X,Z) where, this time, the Z node is white to indicate that it is hidden or latent. If we marginalize out the variable Z from this model to obtain the distribution on X we will obtain exactly the previous formula. Also note that, in this model, X has a multivariate Gaussian distribution.
-[ 116 ]
- p(X |Θ)=∑iπ (2π) ∑
-i m/2 1/2 ⎜ i
-1 ⎛1 T∑−1 ⎞
-i⎟ This result looks dense but it's time to draw the corresponding probabilistic
-exp⎝−2(x−μ ) i (x−μ )⎠
-    i
-  
-Chapter 4
-From this distribution it is also simple to compute the posterior of Z given X. This is a value of interest: we want to know what the probability is of Z being in state i after observing Z; in other words, it gives us information about which distribution the observed variable comes from. Indeed, let's  rst draw a mixture of three Gaussians in R with the following code. This time we will use the package called mixtools:
+
+这个图展示了$P(X,Z)$的概率分布，其中$Z$节点是白色的，说明它是隐含变量。如果我们把$Z$边缘化，得到$X$的分布，我们就可以得到之前的公式。同时注意，在这个模型中，$X$是多变元高斯分布。
+
+
+根据这个分布，我们可以很容易的计算出给定$X$时$Z$的后验概率。这是我们关注的值：我们希望知道观察到$X$后，$Z$处于状态$i$的概率。换句话说，它告诉了我们可观测变量的分布来自于哪里。首先让我们使用下列代码画出3个高斯分布的混合模型。这次我们使用名为` mixtools`的程序包：:
 
 ```{r,eval=F}
 N <- 400
