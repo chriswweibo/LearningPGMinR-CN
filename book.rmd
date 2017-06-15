@@ -2409,27 +2409,28 @@ $$p(\theta)=p(\pi)\prod_{i=1}^N \prod_{c=1}^C p(\theta_{ic})$$
 * 当然，我们还知道特征变量服从类别或多项式分布。
 * 因此，通过数据计算，$X_i$分布的参数后验概率也服从狄利克雷分布$Dir(N_i+\alpha)$，其中$N_i$是计数，和之前的工作一样！由于是一种变形形式，过程很简单。
 
-So  nally, if we want to incorporate the Dirichlet prior into our computations, the posteriors of the parameters for the class variable are:
-πc=Nc+αc whereα0=∑αc. N +α0 c
-And the prior distribution of π is a Dir(⍺) where ⍺ = (⍺1, ...,⍺c).
-For the parameters of the feature variables, the solution is exactly the same:
-  θ(s) = Nic +βs
-ic Nc +β0 where β0 =∑s βs
- [ 105 ]
- 
-Bayesian Modeling – Basic Models
-And the prior distribution of θic is a Dir(β), where β = (β1, ..., βs).
-Wait! Is it really as simple as this? Well, yes it is, thanks to the conjugacy in this
- Bayesian model. If you look carefully at the formulas, you will see that none of the π and θ(s) can be equal to zero now because of the values of α and β. Indeed, in
-c ic
-the de nition of the Dirichlet distribution, it is required that the parameters of the Dirichlet should be strictly positive.
-So the last problem we need to solve is choosing a value for α and β. One common choice is to take 1 for all of them. In terms of Dirichlet distributions, it means we choose a uniform prior for all the parameters of the class and feature variables. It means we will allow our parameters to take any value with equal probability except of course
-0. Choosing different values for α and β will lead to different form results. We can
-try to promote certain values by pushing the Dirichlet distribution in one direction or another; or, on the contrary, we can try to keep all parameters with similar values.
-If you choose 1 for the Dirichlet parameter, you will obtain something called Laplace smoothing, which we saw before in the naiveBayes function of the e1071 R package. Sometimes, it is also called a pseudo-count because it could be seen as arti cially adding one example of any case to your dataset.
-But the Dirichlet prior is not the only possible prior we can use. In the case of binary variables, another distribution of interest is the Beta distribution. In the next section we will present more formally the Beta-Binomial model and see its relation to the Dirichlet-Multinomial model we just saw. We will see that the results are similar and also how to play with the parameters of the Beta distribution in order to describe different types of prior for our class and feature variables.
+因此，如果我们希望把狄利克雷先验概率放到计算中，类别变量参数的后验概率就是：
 
-## Beta-Binomial
+$$\pi_c=\frac{N_c+\alpha_c}{N+\alpha_0}，其中\alpha_0=\sum_c\alpha_c。$$
+
+$\pi$的先验概率是$Dir(\alpha)$，其中$\alpha=(\alpha_1,...,\alpha_c)$。
+
+对于特征变量的参数，方法也一样：
+
+$$\theta_{ic}^{(s)}=\frac{N_{ic}+\beta_s}{N_c+\beta_0}，其中\beta_0=\sum_s\beta_s。$$
+
+$\theta_{ic}$的先验概率是$Dir(\beta)$，其中$\beta=(\beta_1,...,\beta_s)$。
+
+
+稍等，事情就这么简单吗？是的，这都得益于这个贝叶斯模型的共轭性。如果我们仔细看一下这些公式，我们会发现因为$\alpha$和$\beta$的取值，$\pi_c$和$\theta_{ic}^{(s)}$都不会等于0。事实上，根据狄利克雷分布的定义，它的参数都应该为正。
+
+最后的问题是选择$\alpha$和$\beta$的取值。通常，二者都会取1。从狄利克雷分布的角度讲，这意味着我们给类别和特征变量都选择了均匀分布。我们可以允许参数等概率的选取任何值，除了0。选择不同的$\alpha$和$\beta$值会产生不同的结果。我们可以改变狄利克雷分布的两个方向，尝试输入不同的值，或者我们也可以保持所有的参数都取一样的值。
+
+如果狄利克雷分布的参数取1，那么会得到名为拉普拉斯平滑的公式。这就是我们之前在`e1071`程序包的函数`naiveBayes`中看到的。有时，它也叫作伪计数（pseudo-count），因为它可以看做是手动给数据集添加一个例子。
+
+但是狄利克雷先验概率并不是唯一可用的概率。在二元变量中，另一种有意义的分布是Beta分布。在下一节中，我们会更正式的介绍Beta二元分布，并给出它与狄利克雷多元分布的关系。我们会看到最终结果很类似，以及如何处理Beta分布的参数，以便描述类别和特征变量的不同类型的先验概率。
+
+## Beta二元分布
 
 The Beta-Binomial prior is another example and a well-known model where we set a prior distribution on the parameter of the distribution of interest. Here we are going to use a binomial distribution with a θ parameter. The θ parameter can be seen as a probability that an event will occur or not, or a proportion of the positive events in a sequence of experiments. Therefore, the parameter θ takes values in [0,1].
 Let's  rst review the Binomial distribution with a simple example: let's say we have a coin and we want to know if the coin is impartial or not when we play the heads or tails game. The game is to toss the coin N times and try to estimate what is the probability θ of obtaining a head. This problem is very important because it is the basis of many other models. You can replace the game of heads or tails with the result of experimentation (positive or negative), the result of a poll (yes or no), or any other binary answer.
