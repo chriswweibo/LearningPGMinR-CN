@@ -2428,6 +2428,7 @@ $\theta_{ic}$的先验概率是$Dir(\beta)$，其中$\beta=(\beta_1,...,\beta_s)
 
 如果狄利克雷分布的参数取1，那么会得到名为拉普拉斯平滑的公式。这就是我们之前在`e1071`程序包的函数`naiveBayes`中看到的。有时，它也叫作伪计数（pseudo-count），因为它可以看做是手动给数据集添加一个例子。
 
+<<<<<<< HEAD
 但是狄利克雷先验概率并不是唯一可用的概率。在二元变量中，另一种有意义的分布是Beta分布。在下一节中，我们会更正式的介绍Beta二项式分布，并给出它与狄利克雷多元分布的关系。我们会看到最终结果很类似，以及如何处理Beta分布的参数，以便描述类别和特征变量的不同类型的先验概率。
 
 ## Beta二项式分布
@@ -2472,6 +2473,7 @@ $$LL(\theta)=log \; \theta^{N_1}(1-\theta)^{N_0}=N_1 log \; \theta +N_0 log\; (1
 通常，我们会采用负对数似然率，只需要处理正数。另一个原因是，当我们希望最大化似然率时，我们也可以最小化负对数似然率。这是等价的问题。许多优化问题都试图找出函数的零值（最小值）。因此采用负对数似然率实现起来更简单。
 
 为了详细说明这个思想，只需用R画出下列图形：
+
 
 ```{r,eval=F}
 x <- seq(0,1,0.05)
@@ -2642,21 +2644,26 @@ for(i in 1:3)
   points(X[[i]],pch=18+i, col=1+i)
 ```
 
-This little program simply generates three sets of data from a multivariate Gaussian distribution with two dimensions. It plots the three datasets on the same graph and as expected the points create three clusters of data, as shown in the next  gure. If we regroup the three little datasets into a big one, one interesting problem would be to  nd out the parameters of the three clusters. In this example, we have an ideal situation because we generated an equal number of points for each cluster. But in real applications, this will rarely be the case.
+这个小程序从2维多元高斯分布中生成了三个数据集，并在同一个图中绘出三个数据集，和期望的一样这些点形成了三组数据。如果我们重新对三组数据进行分组形成一个大组，一个有趣的问题是找出三个组的参数。在这个例子中，我们有一种理想的情型，因为我们为每一个组生成了相等数量的点。但是在实际应用中，很少有这种情况。
 
 ![](figures/117_1.png)
 
     
-The posterior probability of the hidden variable Z can be written as p(Zi =1|X,Θ)= p(X|Zi =1,θi)p(Zi =1|πi)
-p(X |Θ) πiN(X,μi |∑i)
-∑jπjN(X,μj |∑j) This is a simple application of the Bayes rule again.
-The next step is to estimate the parameters θ of the model, assuming again that the data is iid. If we call D = {xn} the dataset, we can, as before, write the log-likelihood of the model:
-  =
- LL(Θ|D)=∑nlogp(xn |Θ)
-= nlog i πN(x |μ,∑)
-This log-likelihood is a bit hard to optimize and we will use an adequate optimization algorithm. As mentioned before, the fact that a variable is hidden will lead us to use the EM algorithm.
-From the previous example, we will assume that the variable Z has three states {z1,z2,z3} for each of the three Gaussian components. The only constraint in the Gaussian mixture model is that one has to assume the number of Gaussians beforehand. Other models exist where the number of Gaussian components is also a random variable and the learning algorithm will try to discover the most probable number of components while at the same time  nding the mean and covariance matrix of each component.
-Here we use the same code as previously:
+隐含变量$Z$的后验概率可以写成：
+
+$$p(Z_i=1 \mid X,\Theta)=\frac{p(X \mid Z_i=1,\theta_i)p(Z_i=1\mid \pi_i)}{p(X \mid \Theta)}=\frac{\pi_iN(X,\mu_i \mid \sum_i)}{\sum_i \pi_iN(X,\mu_i \mid \sum_i)}$$
+
+这是贝叶斯规则的又一次使用。
+
+接下来，我们需要估计模型参数$\theta$，再次假设数据都是独立同分布的。如果我们把记$D = \{x_n\}$为数据集，模型的对数似然率可以写作：
+
+$$LL(\Theta \mid D)=\sum_n log p(x_n \mid \Theta)=\sum_n log \{\sum_i \pi_iN(x_n \mid \mu_i,\sum_i)\}$$
+
+这个对数似然率不太容易优化，我们会使用合适的优化算法。正如之前提到的，隐含变量的存在促使我们使用期望最大化算法。
+
+根据之前的例子，我们可以假设变量$Z$有三个状态$\{z_1,z_2,z_3\}$，对应三个高斯分布模块。高斯混合模型中仅有的约束是我们需要提前假设高斯分布的数。也有其他的模型，允许高斯分布数量是一个随机变量，学习算法会尝试找出最可能的模块数，与此同时找出每一个模块的平均值和协方差矩阵。
+
+我们使用之前同一份代码：
 
 ```{r,eval=F}
    library(mixtools)
@@ -2670,10 +2677,12 @@ N <- 400
    model3 <- mvnormalmixEM(x, k=3,verb=TRUE)
 ```
  
-Chapter 4
-It will take some time to compute the results. The parameter verb=TRUE displays the result of each iteration of the EM algorithm. What is interesting to see is the log- likelihood. In the  rst case (model2), the log-likelihood will go from approximately 3711 to -3684 in 27 steps. Your results might be different because remember that we generate the dataset at random using mvrnorm.
-The problem with model2 is that the number of components is taken by default to be 2: you can perform help(mvnormalmixEM) in R to see the parameter k. And we know we have three components in this mixture. However, model3 has a number of components k=3, closer to the real dataset, and obviously the log-likelihood will be closer to 3. It goes from 3,996 to only 3,305 in 41 iterations (again it might be slightly different on your computer). So it seems the convergence has been far better in the second case when we assume the correct number of components.
-We can now plot the log-likelihood evolution of the EM algorithm to understand the difference between the two models:
+
+计算这个结果需要花些时间。参数`verb=TRUE`会展示期望最大化算法的每次迭代结果。其中需要关注的是对数似然率。在第一种情型（`model2`）中，对数似然率会在27步内，从3711下降到-3684。读者的结果可能会有不同，因为我们会使用`mvrnorm`生成随机数据集。
+
+`model2`的问题是高斯分布模块的数量默认取为2：读者可以在R中运行`help(mvnormalmixEM)`查看参数`k`。我们知道混合模型中有3个模块。然而，`model3`有三个模块，`k=3`，与实际数据集相同。对数似然率在41次迭代中，只从3,996降到3,305（可能和读者的也有些许不同）。看起来，当我们给出正确的模块数量时，第2种情型的收敛速率要好很多。
+
+我们可以绘制期望最大化算法的对数似然率演化过程，理解两个模型有什么不同：
 
 ```{r,eval=F}
 plot(model2,xlim=c(0,50),ylim=c(-4000,-3000))
@@ -2682,19 +2691,20 @@ plot(model,lt=3,xlim=c(0,50),ylim=c(-4000,-3000))
 ```
 
 ```
-Note that, by  xing the size of the graph, we can easily superimpose the two graphs. The dashed line is the graph corresponding to the model with three components. It is clear that the log-likelihood gets closer to zero during this algorithm. However, it takes more iterations to reach this result.
+需要注意的是，通过固定图形的大小，我们可以轻松的添加两幅图。虚线对应拥有三个模块的模型。可以明显的看到，对数似然率随着算法运行逐渐靠近0.但是使用的迭代次数要更多。
 ```
 
-![](figures/119_1.png)      
-Bayesian Modeling – Basic Models
-By looking at the results in model3, we can have a better understanding of the model that has been found by the EM algorithm:
+![](figures/119_1.png)    
+
+
+观察`model3`的结果，我们可以更好的理解期望最大化算法所导出的模型：
 
 ```{r,eval=F}
 model3$lambda
 [1] 0.3358283 0.3342840 0.3298877
 ```
 
-The proportions of each component are, as expected, very close to our initial proportions. You can change the number of points for each component and check again:
+每一个模块的占比，如所期望的，非常接近初始占比。读者可以改变每个模块的点的数量，并再次运行和确认：
 
 ```{r,eval=F}
 X <- list(
@@ -2704,14 +2714,15 @@ X <- list(
 x <- do.call(rbind,X)
 ```
 
-And then let's rerun it with mixtools:
+使用`mixtools`再次运行:
 
 ```{r,eval=F}
 model3.2 <- mvnormalmixEM(x, k=3,verb=TRUE)
 ```
 
-We can see the log-likelihood going from approximately -1925 to -1691 in 84 iterations. But now the proportions are 0.3378457, 0.1651263, and 0.4970280 which indeed correspond to the proportions we initially set in our toy dataset.
-Again we can check the other parameters, and see they are similar to those we set up in our dataset. In a real-world application, we don't have any idea of the location and covariance of each component, of course. But this example shows that the EM algorithm usually converges to the desired values:
+我们可以看到对数似然率在84次迭代中，从-1925变到-1691。但是占比分别是0.3378457, 0.1651263和0.4970280。这与我们开始设定的示例数据集的比例是相对应的。
+
+我们再次确认其他参数，可以看到它们类似于我们在数据集中的设定。在现实世界中，我们并不知道每个模块的位置和协方差。但是这个例子说明期望最大化算法经常会收敛到期望的取值上：
 
 ```{r,eval=F}
 model3$mu
@@ -2723,108 +2734,113 @@ model3$mu
 [1] 4.989129 5.076438
 ```
 
-Now it's time to look at the result more graphically to really understand which components have been found by the EM algorithm.
-First of all, we plot model3 with the following command and display its three components with plot(model3, which=2):
+现在，让我们看一下图形化的结果，真正理解期望最大化算法都找出了哪些模块。
+
+首先，使用下列命令绘制`model3`，使用`plot(model3, which=2)`展示3个模块：
 
 ![](figures/121_1.png) 
- Then we display, for comparison purposes, model2 and model3.2:
+
+ 然后展示`model2`和`model3.2`以便比较：
  
  ![](figures/121_2.png)
 
-The following  gure shows model3.2:
+下图给出了`model3.2`:
 
  ![](figures/122_1.png)
-And now we conclude from our observations:
+ 
+现在我们可以从观察结果中得出：
 
-* model3 and model3.2 are extremely similar, as expected.
-* model2, for which we chose to have only two components, seems to have made an acceptable choice with the components. Indeed the two bottom components have an almost similar orientation. So the algorithm converged toward a solution in which one Gaussian will embed the two bottom components, and another Gaussian will embed the top one, which has a different orientation. It is a good result.
+* `model3`和`model3.2`非常类似。这与期望的相同。
+* `model2`, 即设定有2个模块的模型，看起来给出了一个可以接受的选择。事实上两个底部的模块拥有几乎相同的走向。因此算法收敛到一个高斯分布包含两个底部模块，另一个高斯分布包含顶处的走向不同的模块的情型。它也是个不错的结果。
 
 ## 小结
 
-In this chapter we used the simple yet powerful Bayesian model, which has a representation as a probabilistic graphical model. We saw a Bayesian treatment of the over- tting problem with the use of priors, such as the Dirichlet-multinomial and the famous Beta-Binomial model.
-[ 122 ]
-    
-Chapter 4
-The last section introduced another graphical model, which was around before the invention of probabilistic graphical models and is called the Gaussian mixture. It is a very important model to capture data coming from different subsets within the same model. And  nally, we saw another application of the EM algorithm: learning such models and  nding out the parameters of each Gaussian component.
-Of course, the Gaussian mixture is not the only latent variable model; in fact it represents a lot of Bayesian models and the probabilistic graphical model framework.
-In the next chapter, we will continue our study of inference algorithms for Bayesian models and probabilistic graphical models with the introduction of a new and very important family of algorithms: the sampling algorithm, also known as the Monte- Carlo algorithm. It is arguably one of the most important algorithms in the  eld
-of machine learning because it allows the use of many types of model that were previously too complicated to use.
- [ 123 ]
+在这一章中，我们使用了简单而强大的贝叶斯模型。它拥有表示概率图模型的能力。我们看到了过拟合问题的贝叶斯解决方案，它使用先验分布，例如狄利克雷函-多项式分布和著名的Beta二项式分布。
+
+
+最后一节介绍了另一个图模型，它在概率图模型出现前就有了，也就是高斯混合模型。它是一类非常重要的模型，可以捕捉同一个模型中来自不同子集的数据。最终，我们看到了期望最大化算法的另一个应用：学习这个模型，并找出每一个高斯分布模块的参数。
+
+当然，高斯混合模型并不是唯一的隐变量模型。事实上，它代表了许多贝叶斯模型和概率图模型框架。
+
+在下一章中，我们会继续研究贝叶斯推理算法，并介绍一组新的非常重要的概率图模型算法：抽样算法，也叫做蒙特卡洛算法。它被认为机器学习中最重要的算法之一，因为它支持许多之前太过复杂而不易使用的模型。
   
 --------
 
 # 第5章 近似推断
 
-This chapter introduces a second class of inference algorithms, maybe the most important of all because of their versatility. The approach is completely different from what we have seen until now. Indeed, we saw two classes of algorithms, one based on a pure analytic resolution of the problem by calculating manually the posterior distribution and the other one by using message propagation in a graph. In both cases, the result was computed exactly. In the case of an analytic solution, computing the solution usually boils down to computing a function of the posterior distribution. In the case of a message-passing algorithm, computing the posterior distribution is done step-by-step by propagating messages on a graph. If the graph is not appropriate for this type of algorithm, the computations can be extremely long and often intractable.
-However, in many cases, we can trade a bit of accuracy for more speed. This is the main idea of approximate inference. Does it really matter if we are less accurate? Well, it appears that, in many applications, approximate inference is still very accurate. On the other hand, it allows us to deal with more complex models and with many types of distributions, something that is not completely possible with the other approaches.
-In this chapter, we will see one important class of algorithms, called sampling algorithms, also known as Monte-Carlo sampling. The main idea of this class of algorithms is to draw at random from the posterior distribution in order to replace complex computations with simple statistics. For example, if we want to compute the posterior mean of a random variable, we can draw many samples at random from its posterior distribution and simply compute the mean of the values we obtained.
-Monte-Carlo sampling is what really made the Bayesian revolution possible in science. Before, Bayesian models were hard to compute, if not impossible.
-[ 125 ]
-  
-Approximate Inference
-More speci cally, we will look at the following algorithms:
+这一章会介绍第二类推断算法。得益于它的广泛性，它也许是最重要的算法。它的方法与之前学习到的完全不同。其实，我们已经看到了两类算法买一个是基于纯解析的，通过手动计算后验概率分布的方案，另一个是使用图模型中的信息传递的方案。两种情型的结果都是精确的。对于解析的方案，计算过程通常分解为计算后验概率的函数。对于信息传递的算法，计算后验概率可以通过图中的信息传递逐步实现。如果图形不适合这一类算法，计算过程会变的非常耗时，且难以控制。
 
-* Rejection and importance sampling, as a basis for many other methods
-* Markov Chain Monte-Carlo and the Metropolis-Hastings algorithm
+但是在许多情况下，我们经常用精度换速度，这就是近似推断的主要思想。如果没有那么精确，是否影响很大？然而，在多数问题中，近似推理依然很精确。另一方面，它允许我们处理带有许多不同分布的更加复杂的模型。这类模型通过让其他方法变得安全不可行。
 
-These two classes of algorithms will cover most of what we need to know about the Monte-Carlo method. However, many new algorithms are regularly being discovered.
+我们会在这一章使用一类重要的算法，即**采样算法**（sampling algorithms），也叫做**蒙特卡洛采样**（Monte-Carlo sampling）。其主要思想是从后验分布中随机抽出数据，以便使用简单的统计代替复杂的计算。例如如果我们想计算一个随机变量额后验概率平均值，我们可以供后验分布中随机抽取许多样本，然后计算这些样本的平均值。
+
+蒙特卡洛采样使得贝叶斯方案在科学研究中的应用成为可能。以前，贝叶斯模型难以计算，甚至无法计算。
+
+具体说来，我们会介绍下列算法：
+
+* 拒绝采样和重要度采样。它们是许多其他模型的基础。
+* 马尔科夫链蒙特卡洛（Markov Chain Monte-Carlo）和Metropolis-Hastings算法
+
+这两个算法会涵盖蒙特卡洛方法的大部分知识。而今，许多新的算法也逐渐被提出。
 
 ## 从分布中采样
 
-We have a big problem with probabilistic graphical models in general: they are intractable. They quickly become so complex that it is impossible to run anything in a reasonable amount of time. Not to mention learning them. Remember, for
-a simple algorithm such as EM, we need to compute a posterior distribution at each iteration. If the dataset is big, which is common now, if the model has a lot of dimensions, which is also common, it becomes totally prohibitive. Moreover, we limited ourselves to a small class of distributions, such as multinomial or Gaussian distributions. Even if they can cover a wide range of applications, it's not the case all the time.
-In this chapter, we consider a new class of algorithms based on the idea of sampling from a distribution. Sampling here means to draw values of the parameters at random, following a particular distribution. For example, if one throws a dice, one draws a sample from a multinomial distribution, such that six values are possible, with equal probability. The result is a number between 1 and 6. If the die is not fair (say 6 has a higher probability), then it is possible we will obtain more 6s than the other numbers. If we throw the die many times and then calculate the mean value of all the results, we will presumably see a number closer to 6 than 3.
-In many situations, we are more interested in some properties of the distribution rather than the distribution itself—for example, its mean or variance. It means
-that, in many cases, we want to compute an expectation of a function f(x) with respect to a probability distribution p(x). Here, x can be any random variable of any dimension we want. For example, p(x) can be a multivariate Gaussian distribution or a probabilistic graphical model.
-In the case of continuous variables, we want to solve the generic problem of evaluating the expectation:
+通常概率图模型有一个比较大的问题：难以控制。概率图模型会变得非常复杂，以至于无法在合理的时间内运行任何逻辑，更不用说学习模型了。对于期望最大化这类简单的算法，我们需要计算每次迭代的后验概率。如果像当今的情况，数据集太大，模型又有许多维度，那么该算法也变得无法使用。而且，我们还只是局限在一小类分布上，例如多项式分布或者高斯分布。尽管它们可以涵盖大量的应用，但是并不是任何问题都是如此。
+
+在本章中，我们基于采样的思想，考虑一类新的算法。这类采样的意思是随机抽取一些服从特定分布的参数的值。例如，如果我们投掷一枚硬币，我们可以从多项式分布中抽取一个样本，使得样本可以取6个值，并且概率相同。结果是从1到6之间的数。如果骰子不是公平的（比如6拥有较大的概率），那么我们很有可能获得6的次数比其他数字多。如果我们多次投掷骰子，我们可以计算结果的平均值，我们很有可能看到一个靠近6，而非靠近3的数字。
+
+在许多问题中，我们更关系分布的特性，不是分布本身。例如，它的平均值或方差。这意味着，我们在许多问题中，希望通过概率分布$p(x)$知道函数$f(x)$的期望。这里,$x$可以是任意维度上的任意随机变量。例如，$p(x)$可以是多变元高斯分布或概率图模型。
+
+对于连续变量的情型，我们希望解决估计期望的原生问题：
 
 ![](figures/127_1.png)
-  E ( f ) = ∫ f ( x )p ( x ) dx 
 
-When x is discrete, the integral is replaced by a summation.
-In the example in the screenshot, the distribution is in red and the function in green. We immediately see there will be many problems sampling from such a complex distribution.
-The algorithms presented in this chapter will try to solve many of those problems.
-The main idea in sampling is to replace the evaluation of an integral with a simpler sum over a set of samples drawn independently from the distribution p(x). The previous expectation can then be approximated by a  nite sum:
-ˆ 1∑L ((l)) f=Ll=1 fx
-[ 127 ]
-  
-Approximate Inference
-E f =E(f)
-If the samples are drawn from the distribution p(x) then ( ˆ ) and, similarly,
-the variance of the estimator is:
-var f =LE f−E(f) (ˆ)1(2)
-In this method, the problem is to obtain independent samples. It is not always the
-case and the number of effective samples might be fewer than the number of points
-drawn from the distribution. However, as seen in the previous formula, the variance
-of ˆ , the estimator does not depend on the dimension of x. It means that, even in f
-high-dimensional problem such as a graphical model, high accuracy can be obtained with a relatively small number of samples.
-But as we stated before, the main problem is in particular sampling from the distribution p(x). And it can be hard or even impossible to do it sometimes. When the distribution p(x) is a graphical model in a directed form (such as most of the models we have in this book), the technique to draw a sample is quite simple and called ancestral sampling.
-Given an ordering of the variables xi in the graph, from the top of the graph to the bottom, one can draw a sample from the graphical model by sampling successively each variable and then assigning the sampled values at the corresponding variables to sample from its descendant. For example, let's say we have the following graph:
+$$  E ( f ) = \int f ( x )p ( x ) dx $$
+
+当$x$是离散值时，积分替换成求和。
+
+
+在上面截图的例子中，分布用红线表示，函数用绿线表示。我们会马上发现许多问题都从这样的分布中抽样得到。
+
+本章的算法尝试解决许多类似的问题。
+
+采样的主要思想是使用从分布$p(x)$中独立抽取的样本的求和代替对积分的估计。之前的期望可以近似的写成一个有限加和的形式：
+
+$$\hat{f}=\frac{1}{L}\sum^L_{l=1} f(x^{(l)})$$
+
+
+如果样本来自于分布$p(x)$，那么$E(\hat{f})=E(f)$。类似的，这个估计的方差是：
+
+$$var(\hat{f})=\frac{1}{L}E(f-E(f)^2)$$
+
+在这个方法中，问题要是要获取独立样本。实际情况并非总是如此，有效的样本数量可能比抽样的数据点要少。但是，从之前的公式可以看到，$\hat(f)$的方差，并不依赖$x$的维度。这表明，即使在图模型这样的高维度问题中，我们也可以通过少量的样本获得较高的精确度
+
+但是，正如之前所述，主要问题是从分布$p(x)$中采样。有时，这个问题很难解决甚至无法解决。当分布$p(x)$是以有向图模型表示时（就像本书的大部分模型一样），采样工作会很简单，叫做**祖先采样**（ancestral sampling）。
+
+给定变量$x_i$在图中的顺序，比如从上到下，我们可以连续的从每个变量上采样，并把相应变量的采样值赋给来自后代的样本上。例如，假设我们有下面的图：
 
 ![](figures/128_1.png)
 
-We start by sampling from p(A) and p(B) independently, then assign the sampled values to A=a and B=b so that we sample from p(C | A=a, B=b). Finally, the last sample is drawn from p(D | C=c). If none of the variables are observed, the procedure is very simple. If, however, one variable is observed, one technique is to keep only the samples that agree with the value of the observed variables. If we have A=a1, for example, then we will keep only the samples in which we have been lucky enough to have A=a1. In this case, not all the samples are usable and the difference between the number of drawn samples and the number of useful samples can be big, because each time a set of samples disagrees with the observed values, it has to be discarded. The probability of a set of samples being accepted decreases with the number of observed nodes.
+我们首先分别从$p(A)$和$p(B)$采样，然后把采样值赋给$A=a$和$B=b$，以便我们可以从$p(C \mid A=a, B=b)$中采样。最后，一个采样是从$p(D \mid C=c)$中采样。如果所有的变量都观察不到，那么过程很简单。但是，如果有一个变量可以观察到，我们就需要保证采样值和可观测变量的值相一致。例如，如果我们有$A=a1$, 那么我们只能对$A=a1$下的分布采样。这种情况下，并不是所有的样本都有用，而且所抽取的样本量和可用的样本量之间的差距可能会很大。因为每次样本集合都与观察值不一致，我们只能抛弃。可接受的样本集合概率会随着可观测变量数目的增多而减少。
 
 ## 基本采样算法
 
-We start our study of sampling algorithms by looking at some basic algorithms that can be used as subroutines in more advanced schemes. In all the algorithms from this book, we assume that we can generate random numbers uniformly from the interval [0,1]. The problem of generating random numbers on a computer is complex and vast. In most cases, random numbers will be generated by a deterministic algorithm, and they are called pseudo-random numbers. They are not random, but their distribution and properties are close enough to a real random generator that they can be used as real random numbers. Pseudo-random number generators are usually based on the estimation of chaotic functions that are extremely sensitive to their initial conditions, which are called the seed. Changing the value can generate
-a completely different sequence of numbers, even if the seed value is just a little bit different from the previous one. Nowadays, we also have electronic devices that can generate random numbers from physical phenomena such as thermal noise, photoelectric effects, or quantum phenomena.
+我们首先看一下基本的采样算法，这些算法可以作为子模块用在其他更加复杂的方法中。本书所有的算法中，我们假设可以从区间$[0,1]$均匀的随机生成一些数字。计算机生成随机数的问题比较复杂和宽泛。在多数情况下，随机数是通过确定的算法生成的，，因此叫做**伪随机数**（pseudo-random numbers）。这些数字事实上并不是随机的。但是它们的分布和属性都非常接近真正的随机数生成器，因此可以作为真正的随机数使用。伪随机数生成器通常基于混沌函数的评估结果，其对初始条件，即**种子**（seed），非常敏感。即使前后两次种子的差异非常小，这些改变也可以生成完全不同的随机数序列。如今，我们还有电子设备可以从诸如热力噪音，光电效应，量子现象等物理现象中生成随机数。
 
 ### 标准分布
 
-In R, it is possible to generate random numbers from standard distributions. However, for the sake of understanding, we will review simple techniques for how to generate random numbers from a uniform distribution only.
-In R, random numbers can be generated from a family of functions beginning with the letter r, such as runif, rnorm, rbeta, rbinom, rcauchy, rgamma, rgeom, rhyper, rlogis, and so on. In fact, density can be estimated using the functions beginning with d, and the cumulative distribution function with functions beginning with the letter p.
-[ 129 ]
-   
-Approximate Inference
-For example:
+在R语言中，我们可以从标准分布中生成随机数。但是，为了便于理解，我们会回顾一下如何从均匀分布中生成随机数。
+
+R语言的随机数生成可以通过以字母`r`开头的一类函数实现，例如`runif`，`rnorm`，`rbeta`，`rbinom`，`rcauchy`，`rgamma`，`rgeom`，`rhyper`，`rlogis`等。事实上，密度可以通过以字母`d`开始的函数实现，累计分布可以通过以字母`p`开始的函数实现。
+
+例如：
 
 ```{r,eval=F}
 runif(1)
 [1] 0.593396
 ```
 
-Here, the parameter of the function is the number of numbers one wants:
+这里，函数的参数是希望得到的随机数的个数：
 
 ```{r,eval=F}
 runif(10)
@@ -2832,14 +2848,14 @@ runif(10)
 [8] 0.7379801 0.4886681 0.5329107
 ```
 
-Of course, these are (pseudo) random numbers, so your results will be different from the examples shown earlier.
+当然，这些都是（伪）随机数，因此结果可能和刚才的例子不同。
 
 ```{r,eval=F}
 rnorm(1,10,1)
 [1] 9.319718
 ```
 
-This generates a normally distributed number, with mean 10 and variance 1. If we generate many of these numbers and plot the running mean, we'll see the mean converging little by little to its true value. This is the main property we will use throughout this chapter and in sampling algorithms in general.
+这个函数生成了正态分布的随机数，其中平均值是10，方差是1。如果我们生成许多随机数，画出实时的平均值，我们会看到平均值逐渐收敛到真实数值。这是贯穿本章，以及采样算法的主要性质。
 
 ```{r,eval=F}
 x<-rnorm(1000,10,1)
@@ -2850,17 +2866,23 @@ abline(h=10)
 
 ![](figures/130_1.png)
 
-Generating a random number from a simple distribution is the basis of all sampling algorithms. Here, we consider we know how to generate a random number from a uniform distribution. In R, we perform runif(1,0,1). By default, the min and max parameters are already 0 and 1. Therefore runif(1) will do.
-Suppose we transform the uniformly random values with a function f (.) such that y=f(x). The distribution of y will be:
-p(y)= p(x) dx dy
-We need functions f(x) such that the distributions of y are distributed according to the desired distribution p(y). Integrating p(y), we have:
-x = h(y)≡ ∫y p(yˆ)dyˆ −∞
-Therefore, y = h−1 (x), which is the inverse function on the inde nite integral of the desired distribution. Let's take a simple example with the exponential distribution.
-This distribution is continuous with a density function p(x)=λexp(−λx) and a support on [0, +∞[. Integrating h(y) gives h(y)=1−exp(−λy), which is the
-cumulative distribution function of the exponential distribution.
-As a side note, the exponential distribution is useful to describe the lengths of inter- arrival times in a Poisson process. It can be viewed as the continuous version of the geometric distribution.
-Therefore, if we transform our uniformly distributed variable x with the function h−1 = −λ−1 ln(1− x), then y will be exponentially distributed.
-We can check it experimentally by plotting the distribution of our function and comparing it with the distribution of an exponential distribution. We take lambda=2 in this example:
+从简单分布中生成随机数是一切采样算法的基础。我们已经知道如何从均匀分布中生成随机数。在R中，我们可以使用`runif(1,0,1)`。参数`min`和`max`默认为0和1。因此`runif(1)`也是可以运行的。 
+
+假设我们用函数$f(.)$转换均匀分布的随机数，以便满足$y=f(x)$。$y$的分布就是：
+
+$$p(y)= p(x) \lvert \frac{dx}{dy} \rvert$$
+
+我们需要函数$f(x)$，保证$y$的分布与期望的分布$p(y)$一致。加入$p(y)$，我们有：
+
+$$x = h(y)≡ \int ^y _{- \infty} p(\hat{y})d\hat{y}$$
+
+因此，$y = h^{−1} (x)$，它是期望分布的不定积分上的逆函数。我们以指数分布为例。这个分布是连续的，其中那个密度函数是$p(x)=\lambda exp(−\lambda x)$，取值范围$[0, +\infty]$。加入$h(y)$，我们$h(y)=1−exp(−\lambda y)$，即指数分布的累计分布函数。
+
+另外，指数分布在描述泊松过程中的间隔时长非常有用。它可以看作是几何分布的连续值版本。
+
+因此，如果我们把均匀分布的变量$x$换成函数$h^{−1} = −\lambda^{-1} ln(1− x)$, 可以得到指数分布。
+
+我们可以尝试性的绘制函数的分布，并与指数分布作比较。取`lambda=2`：
 
 ```{r,eval=F}
 x<-runif(20000)
@@ -2870,60 +2892,62 @@ t<-seq(0,4,0.01)
 lines(t,dexp(t,2),lw=2)
 ```
 
-We  rst generate 20,000 points from a uniform U(0,1) distribution. Then, inv_h is the function de ned earlier and we plot a histogram. Note the parameter freq=F
-to draw with the densities instead of the frequency. Finally, we draw the density function of an exponential distribution with the same parameter (the thick black line in the following graph) and see that the two distributions, the empirical one and the analytic one, are a very good match.
-The following screenshot shows the result:
+我们首先从均匀分布U(0,1)中生成2000个点。`inv_h`是之前我们定义的函数。我们画出柱状图。注意参数`freq=F`，确保画出密度图而不是频度图。
+最终，我们使用同样的参数画出了指数分布的密度函数（图中黑色曲线），并看到两个分布，一个是经验分布，一个解析分布。二者吻合的很好。
+
+下面的截图给出了结果：
 
 ![](figures/132_1.png)
 
-The problem with this technique is the evaluation of the inde nite integral. In simple cases, this integral is readily available but this is not always so. In such a case, we need another strategy and the key is to use a simpler distribution to approximate the more complex distribution we can sample from. There are two basic techniques to do that. One is called rejection sampling, and it uses a simple distribution to draw a sample from and accept the sample at the same time as it falls into the more complex distribution. Otherwise it is rejected. The other technique is called importance sampling and, in this case, samples from the approximate distribution are corrected to take into account their difference with respect to the original distribution one wants to sample from.
-Both techniques are important and used as a basis for more advanced techniques, such as Markov Chain Monte-Carlo (MCMC), that we will see in the second part of this chapter.
-[ 132 ]
-    
-Chapter 5
-In all cases, one of the main ideas is to use a proposal distribution, whose goal is to approximate, even roughly, the distribution we want to sample from. We will call q(x) the proposal distribution and p(x) the initial distribution in the following sections.
+这个技术的主要问题是对不定积分的评估。在简单情型下，这个积分通常可行，但并不保证总是可行。这样的话，我们需要另外一种策略，方案是使用更简单的分布来近似复杂的分布，以便采样。有两项基本技术可以实现。一个是**拒绝采样**（rejection sampling），它使用简单分布进行采样，同时允许样本服从更加复杂的分布。否则就把样本拒绝掉。另外一项技术是**重要性采样**（importance sampling）。在这种情况下来自近似分布的样本会被纠正，以便把偏离原始分布的差异考虑进来。
+
+两种技术都很重要，都可以作为先进技术的基础，例如**马尔科夫链蒙特卡洛**（Markov Chain Monte-Carlo，MCMC）。我们会在本章的第二部分看到。
+
+无论哪种情型，一个主要思想是使用**建议分布**（proposal distribution），其目的是近似需要从中采样的分布。我们会记$q(x)$为建议分布，$p(x)$为初始分布。
 
 ## 拒绝性采样
 
-Suppose we want to sample from a distribution that is not a simple one. Let's call this distribution p(x) and let's assume we can evaluate p(x) for any given value x, up to a normalizing constant Z, that is:
-p(x)= 1 p (x) Zp
-In this context, p(x) is too complex to sample from but we have another simpler distribution q(x) from which we can draw samples. Next, we assume there exists a constant k such that kq(x)≥ p  (x) for all values of x. The function kq(x) is the comparison function as shown in the following  gure:
+假设我们想从一个不简单的分布中抽取样本。记这个分布为$p(x)$，并假设我们可以对任意$x$给出$p(x)$，同时用常数$Z$做归一化： 
+
+$$p(x)= \frac{1}{Z_p} \tilde{p}(x)$$
+
+在这个问题中，$p(x)$太过复杂，以至于无法抽样。但是我们有另一个更加简单的分布$q(x)$可以从中采样。然后，我们假设存在常数$k$满足对于所有$x$的值，有$kq(x)≥ \tilde{p}(x)$。函数$kq(x)$是比较函数，如下图所示：
 
 ![](figures/133_1.png)
 
-The distribution p(x) has been generated with a simple plot: 
+分布$p(x)$通过简单分布生成：
 
 ```{r,eval=F}
 0.6*dnorm(x,1)+0.4*dnorm(x,5)
 ```
      
-Approximate Inference
-The rejection sampling algorithm is based on the following idea:
+拒绝采样算法基于下列思想：
 
-* Draw a sample z0 from q(z), the proposal distribution
-* Draw a second u0 sample from a uniform distribution on [0, kq(z0)]
-* If u0 > p  (z0 ) then the sample is rejected otherwise u0 is accepted
+* 从建议分布$q(z)$中抽取样本$z_0$
+* 从$[0, kq(z_0)]$上的均匀分布中抽取第二个$u_0$
+* 如果$u_0 > \tilde{p}(z_0)$，那么拒绝样本，否则接受$u_0$
 
-In the following  gure, the pair (z0, u0) is rejected if it lies in the gray area. The accepted pairs are a uniform distribution under the curve of p(z) and therefore the z values are distributed according to p(z):
+在下图中，如果落在灰色区域，那么值对$(z_0, u_0)$要被拒绝。可接受的值对是曲线$p(z)$下的均匀分布，因此$z$值分布与$p(z)$对应：
 
 ![](figures/134_1.png)
 
-The probability of such a pair being accepted is:
-p ( a c c e p t e d ) = 1 ∫ p  ( z ) d z k
-Because it depends on k, it is necessary for the proposal distribution to be as close as possible to the real distribution, otherwise the algorithm will converge very slowly and would be practically useless.
-[ 134 ]
-    
-Chapter 5
-This algorithm is very simple and can be easily implemented. However, it suffers from a drastic problem related to the dimension of the problem. In the case of a probabilistic graphical model, the dimension quickly becomes very large. Rejection sampling is usually a good idea in one or two dimensions, but the rejection rate grows exponentially with the number of dimensions. However, it can be used as a subroutine in more advanced algorithms to generate samples for simple probabilistic forms (for example, at the level of one node if needed).
+这个值对被接受的概率是：
+
+$$p ( a c c e p t e d ) =\frac{1}{k} \int \tilde{p}(z)dz$$
+
+因为这个概率依赖于$k$，因此建议分布需要尽可能的接近真是分布。否则算法会收敛的很慢，还会变的没有实际价值。
+
+这个算法非常简单，实现起来也不难。但是它受困于严重的维度问题。在概率图模型中，维度通常会变得很大。拒绝采样通常是一维或者二维问题的合格方案。但是拒绝率会随着维度呈指数增长。因此，拒绝采样可以当做更复杂算法的子方案来生成一些简单的概率分布样本。
 
 ### R语言实现
 
-We consider the problem of estimating a mixture of Gaussian distribution with a normal distribution. The mixture of Gaussian and the proposal distributions are shown in the following  gure, where the proposal distribution in red has been scaled with k=3.1.
-The mixture of Gaussian distribution is in black and has two modes:
+我们思考一下带有正太分布的高斯混合分布的估计问题。高斯混合和建议分布如下图所示，其中建议分布用红色表示，且$k=3.1$。
+
+高斯混合分布用黑色表示，且有两个高值：
 
 ![](figures/135_1.png)
 
-In R, we de ne the proposal and target distributions as follows:
+我们可以使用R语言定义建议分布和目标分布，如下：
 
 ```{r,eval=F}
 q <- function(x) dnorm(x, 0, 0.5)
@@ -2931,8 +2955,9 @@ rq<- function(x) rnorm(1,  0,0.5)
 p <- function(x) 0.6*dnorm(x,0,0.1)+0.4*dnorm(x,0.6,0.2)
 ```
 
-The parameters are arbitrary. We have a proposal distribution q centered on 0 with a standard deviation of 0.5. The target distribution is a mixture of Gaussian with two components.
-The rejection algorithm is as follows:
+参数是任意的。我们的建议分布$q$以0为中心，标准差为0.5。目标分布是有两个模块的高斯混合分布。
+
+拒绝算法如下：
 
 ```{r,eval=F}
 rejection <- function(N,k,p,q,rq)
@@ -2951,42 +2976,43 @@ x[i] <- z0 }
 }
 ```
 
-The parameters are as follows:
+参数如下：
 
-* N: This is the number of samples.
-* k: This is the coefficient for the proposal distribution.
-* p: This is the distribution to estimate. You must pass a function that takes one parameter.
-* q: This is the proposal distribution (with the same remark as earlier).
-* rq: This is a sampler for the proposal distribution.
+* $N$: 样本数。
+* $k$: 建议分布的系数。
+* $p$: 要估计的分布。必须传递带有一个参数的函数。
+* $q$: 建议分布（和之前定义的讨论相同）。
+* $rq$: 建议分布的采样器。
 
-This algorithm samples N times and accepts or rejects in each sample in a for loop. The result is stored in a data.frame. We keep all the samples to compare the results between rejection or not. The  rst column is the samples, and the second column is a binary value indicating whether the sample has been accepted or not.
-The algorithm works as described in the theoretical part:
+这个算法会做N次采样，接收或拒绝`for`循环中的每一个样本。结果存放在一个`data.frame`中。我们会保存所有的样本，比较拒绝采样之间的结果。 第一列是样本，第二列是表征样本被接收与否的二元值。
 
-1. We  rst create two vectors, accept and x, for storing the results.
-2. We start a loop in which:
-1. We sample z0 from the proposal distribution.
-2. We sample u0 from a uniform on [0,1].
-3. We accept or reject the value and store the result.
+算法的理论描述如下：
 
-Let's do a few experiments to understand the behavior of this important algorithm. In the experiments, in order for the reader to be able to reproduce exactly the same results, we will use a  xed random seed by doing:
+1. 我们首先创建两个向量，`accept`和`x`，以便存放结果。
+2. 我们运行一次循环：
+     1. 从建议分布中抽取样本`z0`。
+     2. $[0,1]$上的均匀分布中抽取样本`U0`。
+     3. 接受或拒绝得到的值，并保存结果。
+
+让我们做几个实验，理解一下这个算法的逻辑。在这些实验中，为了让读者能够重现相同的结果，我们会使用固定的种子，如下： 
 
 ```{r,eval=F}
 set.seed(600)
 ```
 
-Moreover, we will use a scaling factor k of 3.1 as:
+而且，我们会使用尺度因子`k=3.1`:
 
 ```{r,eval=F}
 k <- 3.1
 ```
 
-So, the  rst experiment is to run the algorithm with 100 samples:
+因此，第一个实验是用100个样本运行算法：
 
 ```{r,eval=F}
 x <- rejection(100,k,p,q,rq)
 ```
 
-The results are stored in the data.frame x and the head of this data.frame is as follows:
+结果保存在数据框`x`中，头部数据如下：
 
 ```{r,eval=F}
  head(x)
@@ -2999,8 +3025,7 @@ The results are stored in the data.frame x and the head of this data.frame is as
 6  0.97963839  FALSE
 ```
 
-We can see that not all the points have been accepted. In our example, only 47 points out of 100 have been accepted. Looking at the histogram of the accepted values,
-we are far from the target distribution. It means that we need to run the algorithm longer than we did:
+我们可以看到，并不是所有的数据点都被接受了。在我们的例子中，100个点中的47个点被接受。看一下被接受点的柱状图，我们其实离目标分布还很远。这意味着，我们需要更长时间运行算法：
 
 ```{r,eval=F}
 t <- seq(-2,2,0.01)
@@ -3010,8 +3035,9 @@ lines(t,p(t),col=2,lwd=2)
 
 ![](figures/138_1.png)
 
-On this graph, we can see that the accepted samples regroup in the region of the high-probability mass. But running with such a small number of samples is not enough. The red curve is our target distribution.
-We now run the algorithm with 5,000 samples:
+在这个图上，我们可以看到接受的样本重新聚在高概率区域。但是仅仅运行一小部分样本是不够的。红色曲线才是我们的目标分布。
+
+现在我们用5000个样本运行算法：
 
 ```{r,eval=F}
 x <- rejection(5000,k,p,q,rq)
@@ -3019,28 +3045,28 @@ hist(x$x[x$accept],freq=F,breaks=200,col='grey')
 lines(t,p(t),col=2,lwd=2)
 ```
 
-And what we expect in this second run is to see a better concentration of the accepted samples into the regions of high probability of the target distribution.
-The following graph shows the result:
+我们希望在第二次运行结果中看到接受的样本可以更好的集中分布癌目标分布的高概率区域中。
+
+下图展示了结果：
 
 ![](figures/139_1.png)
 
-And indeed the graph looks better now. The histogram follows the true distribution but it is still not perfect. In fact, the number of accepted samples is not that high when we consider it:
+这个图确实看起来好一些了。柱状图服从真正的分布，但是还是不够完美。事实上，被接受样本的数量并不高：
 
 ```{r,eval=F}
 sum(x$accept)
 1581
 ```
 
-If we run the algorithm for longer, we will obtain a better sample set and approach the target distribution very closely.
-[ 139 ]
-    
-Approximate Inference
-So, now we run the algorithm with 50,000 samples. After running it, we  nd that 16,158 of them have been accepted. And the result is far better of course:
+如果我们运行算法的时间更长，我们会得到更好的样本集合，并且更加接近目标分布。
+
+因此，现在我们用50,000个样本运行算法。运行完成之后，我们发现有16,158个样本被接受了。结果也好了很多：
 
 ![](figures/140_1.png)
 
-The two modes of the distribution have been correctly captured and the empirical distribution follows precisely the target distribution. This is at the expense of running the algorithm for longer.
-If we draw the histogram of all the points sampled from the proposal distribution (accepted or not), they follow precisely the proposal distribution as expected:
+分布的两个高值被正确的展示出来，经验分布也非常接近目标分布。这是我们用较长运行时间换来的结果。
+
+如果我们对所有建议分布的样本点（不管是否接受）绘制柱状图，它们也非常接近建议分布：
 
 ```{r,eval=F}
 hist(x$x,freq=F,breaks=200,col='grey')
@@ -3049,7 +3075,7 @@ lines(t,q(t),col=2,lwd=2)
 
 ![](figures/141_1.png)
 
-Finally, it is also interesting to look at the behavior of this algorithm from the point of view of the number of accepted samples. We run a simple function, as follows:
+最后，我们看一下算法中被接受样本的数量。我们运行一个简单的函数，如下：
 
 ```{r,eval=F}
 N <- sapply(seq(1000,50000,1000),
@@ -3060,7 +3086,7 @@ x <- rejection(n,k,p,q,rq)
 sum(x$accept)
 ```
 
-And we plot the result with:
+我们画出结果：
 
 ```{r,eval=F}
 plot(N,t='o')
@@ -3068,54 +3094,59 @@ plot(N,t='o')
 
 ![](figures/142_1.png)
 
-The result is not surprising. The more samples are drawn, the more are accepted, so it gives us an interesting clue: running the algorithm for longer will indeed improve the results with respect to the number of accepted samples.
-But the problem with rejection sampling is that we need to sample many points in order to have good results. Rejection sampling is still a good algorithm and can be used in many situations. In the next section we will explore an improvement on rejection sampling, called importance sampling, in which all the sample points are accepted.
+结果并不意外。样本越多，被接受的量就越多。因此我们会有一个有趣的线索：长时间运行算法，确实可以从被接受样本量的角度来改善结果。
+
+而拒绝采样的问题是我们需要抽样许多点以便得到好的结果。然而，拒绝采样依然是一个很好的方法，可以用在许多问题中。在下一节中，我们会研究对拒绝采样的改进，即**重要性采样**（importance sampling）。这个算法会接受所有的样本点。
 
 ## 重要性采样
 
-Importance sampling is an improvement on rejection sampling. Again the assumptions are the same and we will use a proposal distribution q(x). We also assume that we can compute the value of the density of probability p(x). But we are unable to draw a sample from it because it is, again, too complex.
-[ 142 ]
-    
-Chapter 5
-Importance sampling is based on the following reasoning, where we need to evaluate the expectation of a function f(x) with respect to the distribution p(x):
-E ( f ) = ∫ f ( x )p ( x ) dx
-At this stage, we simply introduce the distribution q(x) in the previous expression:
-E ( f ) = ∫ f ( x ) p ( x ) q ( x ) dx q(x)
-And, as before, we approximate it with a  nite sum:
-  1∑L p(x(l)) ((l)) E(f) L l=1q(x(l))f x
-The ratio r = p (x(l ) ) is called importance weight and it is the bias introduced by l q(x(l))
-sampling q(x) when in fact we wanted to sample from p(x). In this case, the algorithm is very simple because all the samples are used. Again, importance sampling is ef cient if the proposal distribution is close enough to the original distribution. If
-the function f(x) varies a lot, we might end up in a situation where f has high values in areas where the distribution p is small and the sum might be dominated by these areas of low probability. Therefore it becomes necessary to increase the number of samples in order to have better results. So the effective number of samples might in fact be lower than the real number of samples, even if there is no rejection.
-For a graphical model with discrete variables, it is possible to use importance sampling with the following approach:
+重要性采样是对拒绝采样的改进。所有假设都是一样的，我们会使用建议分布$q(x)$。我们还要假设可以计算概率$p(x)$的密度值。但是由于分布太复杂，我们无法从中抽取样本。
 
-• For each variable x in the graph:
-° If the variable is in the evidence set (x is observed), then set it to its
-own observed value.
-° Otherwise, it is sampled from p(x | pa(x)), in which the variables in pa(x) are set to their sampled (or observed) values. Therefore, sampling from p(x | pa(x)) becomes a simple problem.
-[ 143 ]
-      
-Approximate Inference
-The weighting associated with the sample produced by this algorithm is:
-r(x)=∏ p(x| pa(x))∏ p(x| pa(x))=∏ p(x| pa(x)) x∉E p(x|pa(x)) x∉E 1 x∉E
-The two algorithms we introduced are interesting in small dimensions and can be easily implemented. However, we saw that they suffer from severe limitations in high dimensions. Even importance sampling might need a long convergence time, despite the fact that all samples are accepted. The rest of this chapter is therefore dedicated to a very powerful and very framework based on Markov Chain and it is called Markov Chain Monte Carlo (MCMC).
+重要性采样基于下列推理，其中我们需要评估分布$p(x)$下函数$f(x)$的期望：
+
+$$E ( f ) = \int f ( x )p ( x ) dx$$
+
+现在，我们引入分布$q(x)$:
+
+$$E ( f ) = \int f ( x ) \frac{p ( x )}{ q ( x )} dx q(x)$$
+
+和之前一样，我们用有限加和近似这个值：
+
+ $$ \hat{E}(f) \simeq \frac{1}{L} \sum^{L}_{l=1} \frac{p(x^{(l)})}{q(x^{(l)})} f(x^{(l)})$$
+ 
+比值$r_l=\frac{p(x^{(l)})}{q(x^{(l)})}$叫做**重要性权重**（importance weight），它是由分布$q(x)$引入的。在这种情况下，算法非常简单，因为所有的样本都会用到。而且，当建议分布和原始分布非常接近的时候，重要性采样的效率很高。如果函数$f(x)$变化很剧烈，我们可以在$f$取大值的区域下终于算法。分布$p$在这个区域的值应该很小，加和也应该主要受低概率区域的影响。因此很有必要提高样本数量来得到更好的结果。尽管没有被拒绝的样本，有效样本数量应该低于真实的样本数量。
+
+对于带有离散值的图模型，我们可以通过下列方法使用重要性采样：
+
+* 对于图中的每一个变量$x$:
+     + 如果变量在证据集（$x$可以被观测到）中，那么把它设置成自己的观测值。
+     + 否则，它会从$p(x | pa(x))$中抽样，其中$pa(x)$中的变量设置成采样（观测）值。因此，从$p(x | pa(x))$中抽样变成了一个简单的问题。
+
+与这个算法相关的样本权重计算如下：
+
+$$r(x)=\prod_{x \notin E} \frac{ p(x| pa(x))}{ p(x| pa(x))}\prod_{x \notin E} \frac{ p(x| pa(x))}{1}=\prod_{x \notin E} p(x| pa(x))$$
+
+我们介绍的两种算法在低维度上都很有意义，而且可以很容易的实现。但是，我们也看到它们在高维度时都会严重受限。甚至，尽管所有的样本都会被接受，重要性采样也需要较长的收敛时间。本章的其余部分会介绍非常强大的，基于马尔科夫链的框架，即**马尔科夫链蒙特卡洛**（Markov Chain Monte Carlo，MCMC）。
 
 ### R语言实现
 
-The difference between rejection sampling and importance sampling is that the latter is not so much an algorithm to sample from a distribution as a technique to approximate averages with respect to an intractable distribution.
-It is usual to use the following algorithm:
-   ∫ f(x)p(x)q(x)dx  X q(x)
-q(xi ) Here, xi ~ q, that is, x is drawn from the distribution q.
-This gives us a simple algorithm because all we have to sample from q and then apply the earlier formula. We can then estimate all sorts of f(x) function from this simple algorithm.
-In this case, the distribution function q doesn't have to be scaled as in the rejection algorithm. Moreover, all the samples are accepted because there is no such notion as rejection. However, the algorithm is restricted to the evaluation of integrals and can't generate samples from the target distribution.
-So we see that importance sampling has a different type of use case.
-[ 144 ]
-∑N f(xi)p(xi)
-i=1
-∑N p(xi)
-q(xi) i=1
-     
-Chapter 5
-The algorithm can be simply implemented in R and we will use the following code:
+拒绝采样和重要性采样的区别在于，后者作为对复杂分布的近似平均，并不像一个典型的抽样算法。
+
+通常，有下列算法：
+
+$$\int_X \frac{f(x)p(x)}{q(x)}q(x)dx \simeq \frac{\frac{\sum_{i=1}^N f(x_i)p(x_i)}{q(x_i)}}{\frac{\sum_{i=1}^N p(x_i)}{q(x_i)}}$$
+
+这里$x_i \sim q$，即$x_i$来自于分布$q$[^51]。
+
+[^51]:原书此处为$x$，应为笔误。
+
+这个公式给出了简单算法。我们需要从$q$中采样，然后用到之前的公式中。我们可以用这个算法估计所有$f(x)$函数。
+
+在这种情况下，分布函数$q$不必像拒绝采样那样，支持扩展。而且，与拒绝采样的思想不同，所有的样本都会被接受。但是，这个算法受制于积分的计算，也不能从目标分布中生成样本。
+
+所以，我们看到重要性采样有不同的用例场景。
+
+这个算法可以用R语言实现，代码如下：
 
 ```{r,eval=F}
 importance <- function(N,f,p,q,rq)
@@ -3127,58 +3158,59 @@ importance <- function(N,f,p,q,rq)
 }
 ```
 
-The parameters are as follows:
 
-* N: This is the number of samples
-* f: This is the function we want to know the expectation of
-* p: This is the target distribution function
-* q: This is the proposal distribution function
-* rq: This is a sampler from the proposal distributions
+参数如下：
 
-In the following examples, we will estimate the mean of several distributions and therefore the function f will be the identity function in R.
-The algorithm is very simple and follows the formula we saw before:
+* $N$: 样本数。
+* $f$: 希望得出期望的函数。
+* $p$: 目标分布函数。
+* $q$: 建议分布函数。
+* $rq$: 建议分布的采样器。
 
-1. It draws N points from the proposal distribution.
-2. It computes the numerator and denominator of the formula.
-3. It returns the result.
+在下列例子中，我们会估计几个分布的平均值，因此函数$f$应该是R中`identity`函数。
 
-In the next examples, we will compute the mean from the following examples:
+算法很简单，是对之前公式的实现：
 
-* We will use the same mixture of Gaussian we used for rejection sampling and will approximate it with a Gaussian distribution
-* We will approximate a Student's t distribution with a Gaussian
-* We will approximate a Gamma distribution with an exponential distribution
+1. 从建议分布中抽取N个点。
+2. 计算公式的分子和分母。
+3. 返回结果。
 
-And, as before, in order to be able to reproduce the results, we will set the seed beforehand by doing the following in R:
+在下个例子中，我们会计算下列例子的平均值：
+
+* 使用拒绝采样中的高斯混合分布
+* 使用高斯分布近似学生t-分布
+* 使用指数分布近似Gamma-分布
+
+和之前一样，为了能够重现结果，我们会首先设置种子，R代码如下：
 
 ```{r,eval=F}
  set.seed(600)
 ```
 
-The  rst example has two distributions, where the black curve is the target distribution and the red curve is the proposal distribution. We see the same mixture of Gaussian and Gaussian as in rejection sampling:
+第一个例子有两个分布，其中黑色曲线是目标分布，红色曲线是建议分布。我们看到和拒绝采样中一样的高斯混合分布：
 
 ![](figures/146_1.png)
 
-Then the next example uses a Student's t distribution and a Gaussian distribution as the proposal distribution. In this example, the Student's t distribution has 2 degrees of freedom and the Gaussian has a mean of 0 and a variance of 1.5.
-  [ 146 ]
-  
-The following  gure shows the two distributions:
+接下来例子使用学生t-分布和高斯分布作为建议分布。在这个例子中，学生t-分布有两个自由度，高斯分布的平均值是0，方差是1.5。
+
+下列图形给出了两个分布：
 
 ![](figures/147_1.png)
 
- Finally, the last example uses a Gamma distribution as the target and an exponential distribution as the proposal distribution.
-The shape parameter of the Gamma distribution is 2. As for the exponential distribution, the rate parameter is 0.5.
-These two distributions have a support from zero to in nity. Indeed, importance sampling requires that, if the proposal distribution gives a zero probability, then the target distribution must give a zero probability too for the same value.
-[ 147 ]
-Chapter 5
-   
-Approximate Inference
-The following  gure shows the Gamma and the exponential distribution:
+最后一个例子使用Gamma-分布作为目标分布，指数分布作为建议分布。
+
+Gamma-分布的形状参数是2。指数分布的速率参数是0.5。
+
+这两个分布的取值可以从0到无穷。事实上，重要性采样要求，如果建议分布的概率为0，目标分布的概率也必须为0。
+
+下图给出了Gamma-分布和指数分布：
 
 ![](figures/148_1.png)
 
 
-In R we de ne the function of our three examples as follows.
-For the mixture of Gaussian approximated by a Gaussian, we have:
+我们可以用R语言定义三个例子的函数，如下。
+
+对于由高斯分布近似的高斯混合分布，我们有：
 
 ```{r,eval=F}
 p <- function(x) 0.6*dnorm(x,0,0.1)+0.4*dnorm(x,0.6,0.2)
@@ -3186,7 +3218,7 @@ q <- function(x) dnorm(x,0,0.5)
 rq<- function(x) rnorm(1,0,0.5)
 ```
 
-For the Student's t distribution approximated by a Gaussian, we write:
+对于由高斯分布近似的学生t-分布，我们有：
 
 ```{r,eval=F}
 p <- function(x) dt(x,2)
@@ -3194,7 +3226,7 @@ q <- function(x) dnorm(x,0,1.5)
 rq<- function(x) rnorm(1,0,1.5)
 ```
 
-And, for the Gamma distribution approximated by an exponential function, we de ne:
+对于由指数函数近似的Gamma-分布，我们有：
 
 ```{r,eval=F}
 p <- function(x) dgamma(x,2)
@@ -3202,7 +3234,7 @@ q <- function(x) dexp(x,.5)
 rq<- function(x) rexp(1,.5)
 ```
 
-Then we run the  rst experiments:
+然后我们运行第一个例子：
 
 ```{r,eval=F}
 print(importance(1000,identity,p,q,rq))
@@ -3210,7 +3242,7 @@ print(importance(10000,identity,p,q,rq))
 print(importance(50000,identity,p,q,rq))
 ```
 
-The theoretical mean of the mixture of Gaussian is 0.24. Our code gives the following results:
+高斯混合的理论平均值是0.24。我们的代码给出下列结果：
 
 ```{r,eval=F}
 [1] 0.2256604
@@ -3218,8 +3250,9 @@ The theoretical mean of the mixture of Gaussian is 0.24. Our code gives the foll
 [1] 0.2409898
 ```
 
-We see that the more samples we have, the more accurate the estimation is. However, we also see that, with 10,000 samples, the result is already accurate enough. This is one of the advantages of importance sampling: we need fewer samples than rejection sampling to perform this kind of task.
-The second experiment with a Student's t and a Gaussian gives the following result:
+我们看到拥有的样本越多，估计就越准确。但是，我们也看到，使用10,000个样本，结果已经足够精确。这是重要性采样的一大优势：即使我们需要的样本数要比拒绝采样少，同样可以完成任务。
+
+第二个例子使用学生t-分布和高斯分布，结果如下：
 
 ```{r,eval=F}
 [1] -0.00285064
@@ -3227,8 +3260,9 @@ The second experiment with a Student's t and a Gaussian gives the following resu
 [1] 0.06475101
 ```
 
-The theoretical result is 0 because the Student's t is 0-centered.
-And the third experiment with a Gamma and an exponential distribution gives:
+由于学生t-分布以0为中心，因此理论结果是0。
+
+第三个例子使用Gamma-分布和指数分布，结果如下：
 
 ```{r,eval=F}
 [1] 1.971177
@@ -3236,47 +3270,48 @@ And the third experiment with a Gamma and an exponential distribution gives:
 [1] 1.994183
 ```
 
-Again, we see an improvement when we go from 1,000 samples to 10,000. After 10,000 samples, it seems the results are not improving a lot so we can stop the algorithm earlier.
-Also note that the previous examples can be run with exactly the same lines of code as shown earlier. The reader will have to take care to the rede ne the functions p, q, and rq each time.
-[ 149 ]
-   
-Approximate Inference
-The next experiment we are going to do is to run the algorithm with different sample sizes and look at how the estimated mean converges to the true value.
-We will rerun the following code three times, changing the functions p, q, and rq each time:
+我们再次看到当样本数从1,000增加到10,000，结果得到了改进。使用10,000个样本后，结果似乎并不再有明显改进，于是我们停止算法。
+
+同时注意到，之前的例子可以使用完全一样的代码再次运行。读者需要注意每次重新定义函数$p$, $q$和$rq$。
+
+下一个实验我没打算使用不同的样本规模来运行算法，看看估计的平均值是如何收敛到真实值的。
+
+我们重新运行算法三次，每次都改变函数$p$, $q$和$rq$：
 
 ```{r,eval=F}
 t <- seq(1000,50000,500)
 x <- sapply(t, function(i) importance(i, identity,p,q,rq))
 ```
 
-This code iterates from 1,000 to 50,000 samples in steps of 500 on the importance sampling algorithm. The more samples we draw, the more accurate the estimated mean.
-The  rst experiment with a mixture of Gaussian and a Gaussian gives the following result:
+这个代码会使用重要性采样算法，运行500次，样本量从1,000到50,000。抽取的样本越多，估计的平均值越准确。
+
+第一个实验，使用高斯混合模型和高分布，结果如下：
 
 ![](figures/150_1.png)
-The second example with a Student's t distribution and a Gaussian distribution gives the following result:
+
+第二个例子，使用学生t-分布，结果如下：
 
 ![](figures/151_1.png)
 
-We see in this example that, despite a good convergence, we can sometimes have surprising results. It seems indeed that our proposal distribution is not the best approximation. Indeed, importance sampling can be sensitive, as with rejection sampling, to the proposal distribution and gives results that are not completely stabilized.
-  [ 151 ]
-  
-Approximate Inference
-The last experiment uses the Gamma distribution and an exponential distribution as the proposal distribution. The following screenshot shows the result:
+在这个例子中，我们可以看到，虽然收敛的很好，但是有时还是有意想不到的结果。我们的建议分布似乎近似的并不好。事实上，和拒绝采样算法相比，重要性采样算法会非常敏感。建议分布给出的结果并不是完全稳定的。
+
+最后一个例子使用Gamma-分布和指数分布，作为建议分布。下面的截图给出了结果：
 
 ![](figures/152_1.png)
 
-Here we see a clear convergence of the results. At the beginning, the number of samples is too low to give an accurate mean; then, when the number of samples increases, the results are more and more accurate.
-In the next section, we will see a more advanced technique (to sample from arbitrary distributions) called Markov Chain Monte-Carlo sampling. It is a very powerful method and has many applications nowadays.
+这里我们看到结果明显收敛了。开始的时候，样本的数量很少，无法给出准确结果。然后随着样本数的增加，结果越来越精确。
+
+在下一节中，我们会看到更先进的技术（可以从任意分布中采样），即马尔科夫蒙特卡洛采样。它是非常强大的方法，在当今问题中应用也很广。
 
 ## 马尔科夫链蒙特卡洛
 
-MCMC methods have their origin in physics with the work of Metropolis, Ulam, and Rosenbluth. It was in the 1980s that they began to have a signi cant impact on statistics. Many MCMC algorithms and methods have been proposed and they are among the most successful approaches to computing posterior distributions.
-[ 152 ]
-    
-Chapter 5
-If we use the word framework and not algorithm, it is because there is no single MCMC algorithm; instead, there are many. Multiple strategies are possible to implement it based on the problem we need to solve.
-Monte-Carlo has been used for more than half a century to solve many complicated estimation problems. However, its main weakness was, as in rejection and importance sampling, its convergence in high-dimensional problems.
-So Markov Chains were used from the start to estimate the convergence and stability of those methods. But it wasn't until recently (the1980s and 1990s) that they started to be massively used in statistical estimation.
+MCMC方法源自Metropolis，Ulam和Rosenbluth在物理学中的工作。上世纪80年代，该方法在统计学中有巨大影响。人们提出了许多MCMC算法和方法，成为计算后验概率分布中最成功的方法。
+
+我们使用词语*框架*（framework），而不是*算法*（algorithm），这是因为没有单一的MCMC算法，而是有许多MCMC算法。基于要解决的 问题，许多策略都可以实现MCMC算法。
+
+蒙特卡洛方法已经使用了半个多世纪，解决了许多复杂的估计问题。但是，它的主要缺点在于高维空间的收敛问题。
+
+因此马尔科夫链会在一开始估计收敛问题和稳定问题。但是直到最近（上世纪80年代和90年代），才广泛的在统计估计中使用。
 
 ### 主要思想
 
