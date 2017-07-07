@@ -3303,7 +3303,7 @@ x <- sapply(t, function(i) importance(i, identity,p,q,rq))
 
 在下一节中，我们会看到更先进的技术（可以从任意分布中采样），即马尔科夫蒙特卡洛采样。它是非常强大的方法，在当今问题中应用也很广。
 
-## 马尔科夫链蒙特卡洛
+## 马尔科夫链蒙特卡洛算法
 
 MCMC方法源自Metropolis，Ulam和Rosenbluth在物理学中的工作。上世纪80年代，该方法在统计学中有巨大影响。人们提出了许多MCMC算法和方法，成为计算后验概率分布中最成功的方法。
 
@@ -3315,49 +3315,50 @@ MCMC方法源自Metropolis，Ulam和Rosenbluth在物理学中的工作。上世�
 
 ### 主要思想
 
-Markov Chain Monte-Carlo methods are based on the same idea as previously, where we have a complex distribution p(x) and a proposal distribution q(x). However, in this case, the state of the variable x is kept along the way and the proposal distribution depends on this current state, that is we sample from q(x | xt-1). This sequence of x forms a Markov Chain.
-The main idea is that at each step of the algorithm we draw a sample from
-q(x | xt-1) and accept the sample upon certain criteria. If the sample is accepted then the parameters of q are updated according to the new sampled value and we start again, otherwise a new sample is drawn without changing q. So we want to choose a simple q distribution to make it ef cient.
-As before, the problem we want to solve is the expectation of a function with respect to a complex distribution:
-E(e)=∫f (x)p(x)dx
-We assume that we can evaluate p(x) or at least we can evaluate it up to a normalizing constant p ( x ) ∝ p% ( x ) . In order to solve the problem of sampling, the Metropolis-Hastings algorithm (proposed by Metropolis in 1953 and Hastings in 1970) gives a generic way to construct a Markov Chain that is ergodic and stationary with respect to the distribution p(x).
-In other words, it means that if xt ~ p(x) then xt+1 ~ p(x) and therefore the Markov Chain will converge to the distribution p(x).
-[ 153 ]
-   
-Approximate Inference
-The principle of MCMC algorithms is somehow contrary to the principle of rejection and importance sampling in the sense that, instead of aiming directly at the big picture with the proposal distribution, it tries to explore the space of p(x), with a simpler distribution.
-Let me give you an analogy, once explained by Professor Christian Robert from the University of Paris-Dauphine, France, and the University of Warwick, UK.
-Imagine you are a visitor in a museum and suddenly there is a blackout. The gallery is completely dark. Your only way to look at the paintings is to use a small torch. The beam of the torch is very narrow so at any time you will only see a small part of the painting. But you can move your torch along the painting until you discover all of it. Then you will have the big picture. Of course, you can argue that a painting is more than the sum of its parts, but that's another story.
+马尔科夫链蒙特卡洛和之前的思想类似。我们有个复杂的分布$p(x)$和建议分布$q(x)$。但是，在这个例子中，变量$x$的状态会一直保存下来，建议分布依赖于变量的当前状态，也就是说从$q(x \mid x_{t-1})$采样。$x$序列形成一个马尔科夫链。
+
+马尔科夫链蒙特卡洛的主要思想是在算法的每一步中，我们从$q(x \mid x_{t-1})$抽取一个样本，并基于一定的标准接受样本。如果样本被接受了，那么$q$的参数会根据新的采样值更新。持续这一步骤，直到新的样本不改变$q$。所以我么希望选取简单de$q$分布，使过程更快。
+
+和之前一样，我们要解决的问题是根据复杂分布得到一个函数的期望：
+
+$$E(e)=\int f (x)p(x)dx$$
+
+假设我们可以估计$p(x)$，或者至少可以用一个正则化常数去估计它：$p(x) \propto \tilde{p} (x)$。为了解决采样问题，人们提出了Metropolis-Hastings算法（1953年的Metropolis和1970年的Hastings），提供了一种构建遍历和稳定的马尔科夫链的原生方法。
+
+换句话说，这意味着如果$x_t \sim p(x)$，那么$x_{t+1} \sim p(x)$。因此马尔科夫链会收敛到分布$p(x)$。
+
+马尔科夫链蒙特卡洛算法的原理在某种意义上与拒绝采样和重要性采样相反。它不会直接关注整个建议分布，而是使用更简单的分布发掘$p(x)$的空间。
+
+做一个类比。这个例子曾经被法国巴黎第九大学和英国华威大学的Christian Robert教授提过。
+
+假设你是一名博物馆的游客。突然里边灯都灭了。整个博物馆都漆黑一片。唯一可以观看画作的方法是用一个手电。手电的光柱非常细，只能看见画作的一小部分。但是你可以移动手电，看到画作的全部部位。然后你就有了一个整体印象。当然，你可以说整个画作不等同于简单把局部加起来。这就是另一回事了。 
 
 ### Metropolis-Hastings算法
 
-This algorithm will build a sequence of sampled values xt, such that this sequence will converge to p(x). So the chain of values is a sample of p(x) and these values
-are approximately distributed according to p(x). However, at the beginning, and because each value is dependent on its previous value, the  rst samples are also very dependent on the initial value x0. It is therefore recommended not to use the initial values and to give a period of warm-up to the algorithm.
-We recall a similar result in the previous algorithm. Based on the Markov Chain, it is possible to show that, even if it's hard to determine when the algorithm will reach stationarity, the average of the sampled values will converge almost surely to E(f), the empirical average de ned by:
-  1 ∑L ( (l) ) E(f)=L l=1fx
-This will converge almost surely to E(f). We recall that almost sure convergence is de ned as a sequence X1, X2, ..., Xn of random variables converging to a random variable X if:
-  ({
-})
-p s∈S:limX (s)=X(s) =1
-n→∞
-n
-[ 154 ]
- 
-Chapter 5
-Of course, we can't feasibly sample an in nite sequence of variables, but we have
-a guarantee it will converge. So in theory we know it will converge and therefore sampling from the Markov chain is equivalent to iid sampling from the distribution. In practice, we need to sample a lot to get good results.
-The Metropolis-Hastings algorithm works as follows:
+这个算法会生成采样值$x_t$的序列，以便序列可以收敛到$p(x)$。所以整个值链是$p(x)$的一个样本。这些值近似的按服从$p(x)$分布。但是，在开始的时候，由于每一个值都依赖于之前的值，一个样本也依赖于初始值$x_0$。因此，我们不推荐使用初始值，来启动算法。
 
-1. Draw a value xt ~ q(xt | xt-1) where q(x) is our simple proposal distribution.
-2. Compute the probability of acceptance with:
- ⎪ ()( )⎪ ρ ( x , x ) = m i n ⎧ 1 , p  x t q x t − 1 | x t ⎫
-t t−1 ⎨ p (x )q(x |x )⎬ ⎪t−1 tt−1⎪ ⎩⎭
-  3. Take xt with probability ρ(xt, xt-1) and xt-1 with probability 1– ρ(xt, xt-1).
+回忆一下之前算法的结果。根据马尔科夫链，我们可能会看到，尽管确定算法何时趋于稳定很困难，但是样本的平均值很有可能会收敛到$E(f)$，经验平均值定义如下：
+
+$$ \tilde{E}(f)=\frac{1}{L} \sum^L_{l=1}f(x^{(l)})$$
+
+这个值几乎必然收敛到$E(f)$。回忆一下几乎必然收敛的定义。随机变量的序列$X_1，X_2，...，X_n$几乎必然收敛到变量$X$，如果：
+
+$$p(\{s \in S:lim_{n \to \infty} X_n(s)=X(s) \})=1$$
+
+当然，我们不可能真的从变量的无限序列中采样，但是我们可以保证收敛。因此理论上讲，我们知道它会收敛，从马尔科夫链中采样等同于从分布中独立同分布采样。实际操作中，我们需要很多样本，得到好的结果。
+
+Metropolis-Hastings算法流程如下：
+
+1. 抽取值$x_t \sim q(x_t \mid x_{t-1})$，其中$q(x)$是建议分布。
+2. 计算接受概率：$$\rho(x_t,x_{t-1})=min \{1,\frac{\tilde{p}(x_t)q(x_{t-1} \mid x_t)}{\tilde{p}(x_{t-1})q(x_t \mid x_{t-1})}\}$$⎪
+3. 取$x_t$值为概率$\rho(x_t, x_{t-1})$，$x_{t-1}$概率$1-\rho(x_t, x_{t-1})$。
   
 
-Given the choice of q(x), this algorithm will preserve the stationarity of the distribution p(x) in the Markov chain. In theory, again, this algorithm is guaranteed to converge for an arbitrary distribution q(x). This is an impressive result, hence the popularity of this algorithm. However, in practice, things are a bit more complicated because the convergence might happen very late in the process, if for example the proposal distribution q(x) is too narrow. On the other hand, a too large distribution might end up with a very unstable algorithm. It will still converge but with a huge step and can miss the most important part of the original distribution p(x) by leaving the area with high probability mass too early.
-The sequence of samples xt represents a random walk and we can illustrate the previous problem of practical convergence by looking at what happens to such a trajectory in a simple example.
-We want to sample from a two-dimensional Gaussian distribution and we use a smaller two-dimensional Gaussian as the proposal distribution. In order to deal with multi-dimensional Gaussian, we need the MASS package:
+给定$q(x)$，算法会保留马尔科夫链中分布$p(x)$的稳定性。这个算法可以理论地保证收敛到一个任意的分布$q(x)$。这是一个令人满意的结果，也助推了算法的广泛使用。但是实际问题通常比较复杂，因为如果建议分布$q(x)$很窄，收敛可能会出现的很晚。另外，太宽的分布也可能收敛到不稳定的结果上。算法还会收敛，但是可能步长很大。由于过早的离开高概率的区域，算法可能会错过原始分布$p(x)$最重要的部分。 
+
+样本$x_t$的序列代表了随机游走，我们可以看看简单例子中轨迹的形状，来解释之前问题中的收敛现象。
+
+我们想从二维高斯分布中采样，并使用更简单的二维高斯分布作为建议分布。为了处理高维高斯分布，我们需要程序包`MASS`：
 
 ```{r,eval=F}
 library(MASS)
@@ -3367,17 +3368,17 @@ bigauss.estimate <- kde2d(bigauss[,1], bigauss[,2], n = 50)
 contour(bigauss.estimate,nlevels=6,lty=2)
 ```
 
-This code snippet plots a simple two-dimensional Gaussian distribution as shown next. From there, we will use a smaller Gaussian distribution whose next mean value will be drawn from the current small Gaussian distribution. This is not yet an application of the Metropolis-Hastings algorithm, but just an example to visualize what happens with different covariance to the random walk and where it can go in just a few iterations.
-The starting point of the random walk is arbitrarily in the center of the big Gaussian distribution, that is, at coordinates (0,0) in this case:
+这个代码片段绘制了简单的二维高斯分布，如下图所示。我们会使用更简单的高斯分布，它的平均值会从当前的高斯分布中采样得到。这还不是Metropolis-Hastings算法的应用，它只是可视化不同协方差下随机游走的例子，可以展示几次迭代过后轨迹的走向。
+
+随机游走的起点位于大的高斯分布的某一中心，即例子中坐标$(0,0)$：
 
 ![](figures/156_1.png)
 
-The following  gure shows the small proposal distribution in red contour lines:
+下图展示了小的建议分布，用红色等高线表示：
 
 ![](figures/157_1.png)
 
-
-The following code draws random samples from the small distribution in the center and updates its center with the previous value:
+下面的代码在小的高斯分布中心随机采样，并之前的值更新中心：
 
 ```{r,eval=F}
 L <- 10
@@ -3391,24 +3392,19 @@ for(i in 1:L)
   }
 ```
 
-We show three examples, with 10, 100, and 1,000 points. Obviously, a pure random walk is completely off the initial big distribution after a few iterations. As for 1,000 iterations, they are totally off:
+我们给出了三个例子，数据点分别是10个, 100个和1,000个。可以明显看到，几次迭代过后，纯粹的随机游走完全不服从初始的大分布。例子，1,000次迭代后，随机游走完全偏离
 
 ![](figures/158_1.png)
 
-Now, let's complete the picture and implement the last bit of the Metropolis-Hastings algorithm in R. As we assumed that we can estimate p(x) on our target distribution, we will use here the dmvnorm function from the mvtnorm package.
-To illustrate the behavior of this algorithm, we will take a simple Gaussian distribution as p(x) and an even simpler uniform distribution as q(x).
-So the proposal distribution is simply:
-q(xt |xt−1)= 1 I(xt−1 −α,xt−1 +α)(x) 2α
-[ 158 ]
+现在，完成所有Metropolis-Hastings算法的R语言流程。由于我们假设可以估计目标分布的$p(x)$，我们会使用程序包`mvtnorm`中的`dmvnorm`函数。 
+要解释这个算法的行为，我们取一个简单的高斯分作为$p(x)$，以及更简单的均匀分布作为$q(x)$。
+
+所以建议分布就是：
+
+$$q(x_t \mid x_{t−1})= \frac{1}{\alpha} I(x_{t−1} − \alpha , x_{t−1}+\alpha)(x) $$
+
+$p(x)=N(0,1)$，一个简单的高斯分布如下：
     
-  hist(sampler(l,1),main=paste(l,"iterations"),breaks=50,freq=F,xlim=c(-
-4,4),ylim=c(0,1))
-  lines(x0,p(x0))
-}
-The  rst function is the evaluation of p(x). Then it is followed by the Metropolis-Hastings step using the proposal uniform distribution de ned before.
-[ 159 ]
-Chapter 5
- And p(x) = N(0,1), a simple Gaussian distribution:
  
 ```{r,eval=F}
 p = function(x)
@@ -3419,40 +3415,41 @@ mh = function(x,alpha)
 {
   xt <- runif(1,x-alpha,x+alpha)
   if( runif(1) > p(xt) / p(x) )
-xt <- x
-return(xt) }
+    xt <- x
+  return(xt) }
 sampler = function(L,alpha)
 {
   x <- numeric(L)
   for(i in 2:L)
     x[i] <- mh(x[i-1],alpha)
-return(x) }
+  return(x) }
+
 par(mfrow=c(2,2))
 for(l in c(10,100,1000,10000))
 {        
-    hist(sampler(1000,a),main=paste("alpha=",a),breaks=50,freq=F,xlim
-=c(-4,4),ylim=c(0,1))
-        lines(x0,p(x0))
+    hist(sampler(1000,a),main=paste("alpha=",a),breaks=50,freq=F,xlim=c(-4,4),ylim=c(0,1))
+    lines(x0,p(x0))
 }
 ```
-  
-Approximate Inference
-Then we implement the sampler, which takes two parameters: L is the number of iterations and alpha the width of the uniform distribution. The bigger alpha is, the larger the area this proposal distribution will cover. Too large a value will result in too many jumps and poor results. Too small a value will have a serious impact on the numerical convergence of the algorithm, even if we know that theoretically it will converge.
-Then the last part of the code draws some results for 10, 100, 1,000, and 10,000 iterations. Running this code, we obtain the following graph. Your results will be different because we draw numbers at random, of course, but the overall plot
-is similar:
+
+第一个函数是评估$p(x)$。后面是使用之前定义的建议均匀分布的Metropolis-Hastings算法步骤。
+
+
+然后我们实现采样器，包含两个参数： 迭代次数$L$和均匀分布的宽度$alpha$。$alpha$越大，建议分布覆盖的区域越广。这个值过大，后导致很多跳动和不好的结果。这个值过小，机关我们从理论上知道算法收敛，但是依然会严重影响算法的数值收敛性。
+
+代码的最后抽取了10个，100个，1,000个和10,000个样本用于迭代。运行代码，我们可以得到下面的图形。读者的结果可能会有不同，因为我们是随机抽取的样本，但是整体图形是相似的。
 
 ![](figures/160_1.png)
 
-It is clear that, with only 10 iterations, the results are poor. After a warm-up period of 100 iterations, it seems we are close to the mean value, but the variance of such a dataset will be completely off with respect to p(x). After 1,000 iterations, our dataset begins to be quite close to the target distribution. Finally, after 10,000 iterations, we have a superb histogram.
+可以明显看到，只进行10次迭代，结果很差。经常100次迭代热身后，结果似乎靠近了平均值，但是方差相对$p(x)$还是较大。1,000次迭代后，我们的数据集开始非常接近目标分布。最后经过10,000次迭代，我们得到一个很棒的柱状图。
 
- Next, we vary alpha, with 1,000 iterations. We use the following code:
+接着，我们改`alpha`，进行1,000次迭代。我们使用下列代码：
  
 ```{r,eval=F}
 par(mfrow=c(2,2))
 for(a in c(0.1,0.5,1,10))
 {
-        hist(sampler(1000,a),main=paste("alpha=",a),breaks=50,freq=F,xlim
-=c(-4,4),ylim=c(0,1))
+        hist(sampler(1000,a),main=paste("alpha=",a),breaks=50,freq=F,xlim=c(-4,4),ylim=c(0,1))
         lines(x0,p(x0))
 }
 ```
@@ -3460,40 +3457,40 @@ for(a in c(0.1,0.5,1,10))
 
 ![](figures/161_1.png)
 
-Again, we see interesting results: the theory says it will converge. The practice needs a bit of tuning  rst. It seems that alpha=0.5 or alpha=1 are large enough to cover the distribution. However, alpha=0.1 is too narrow and can't explore the space fast enough in only 1,000 iterations. On the other hand, alpha=10 gives a bi-modal distribution; the jumps are too big.
+我们再次看到非常有趣的结果：算法理论上是收敛的，但是实际中还需要一些先期调试。`alpha=0.5`或`alpha=1`对于覆盖分布似乎已经足够。`alpha=0.1`太窄，不能快速的在1000次迭代中探索问题空间。相反，`alpha=10`给出双峰分布。这说明跳动太大了。
 
-If we run the same experiment with many more iterations, such as 50,000, we see a stabilization of the algorithm and most of the proposal distribution seem to converge to the ideal solution. Again, alpha=0.1 and alpha=10 seem a bit weak, but the overall result is more than acceptable this time:
+如果我们运行更多的迭代次数，例如50000次，我们会看到算法的稳定趋势，大部分建议分布都会收敛到理想的结果。而`alpha=0.1`和`alpha=10` 依然不合适，但是这么多次迭代后，整体结果还是可以接受的：
 
 ![](figures/162_1.png)
 
 ## 概率图模型MCMC算法R语言实现
 
-In fact, this section could be the title of book. As a matter of fact, there are several books entirely devoted to this speci c topic. Research in this  eld is extremely active, with many new algorithms coming every year.
-[ 162 ]
-    
-Chapter 5
-There are numerous packages implementing MCMC algorithms for different types of algorithms. There are also more generic frameworks such as the famous BUGS (and its open source implementation OpenBUGS) and a new, even more powerful framework called Stan. Historically, BUGS was the  rst framework to popularize MCMC inference in Bayesian statistics and literally led to a revolution in this  eld, as everyone could bene t from Bayesian statistics right out of the box.
-Making an introduction to each of them and showing all the possibilities of MCMC for a few speci c graphical models would require another book as big as this one. In this section, we will therefore focus on a programming environment available
-in R. In fact, it works also with C++, Python, Matlab, Julia, Stata, and even on the command line! It allows the implementation of all sorts of Bayesian models, as we have seen so far. Stan mainly uses MCMC algorithms to perform inferences.
+事实上，这一节的标题甚至可以作为一本书的名字。有些教材只专注于这一课题。这一领域的研究也很活跃，每年都有许多新的算法提出。
 
-### 安装Stan和RStan
+有许多程序包可以实现MCMC的各种类型的算法。也有很多更原生的框架，例如著名的BUGS（以及相应的开源实现OpenBUGS），新的更强大的框架Stan。 BUGS是历史上第一个在贝叶斯统计中推出MCMC推断的框架，也引起了这个领域的变革，使得每个人都可以从贝叶斯统计中获益。
 
-This procedure is detailed on the following web page: https://github.com/stan- dev/rstan/wiki/Rstan-Getting-Started.
-Thus we will just recall the basic steps in order to install Stan and RStan:
+如果介绍所有框架以及具体图模型的所有MCMC算法，需要我们再出一本书。所以，我们在这一节只关注R语言编程环境。事实上，这些算法也适用于C++，Python，Matlab，Julia，Stata，甚至命令行！它支持目前看到的各种类型的贝叶斯模型。Stan主要使用MCMC算法执行推断。
+
+### 安装`Stan`和`RStan`
+
+具体的过程可以在网页 https://github.com/standev/rstan/wiki/Rstan-Getting-Started中找到。
+
+因此我们只回顾一下基本的步骤，完成`Stan`和`RStan`安装:
 
 ```{r,eval=F}
 Sys.setenv(MAKEFLAGS = "-j4")
 install.packages("rstan", dependencies = TRUE)
 ```
 
-Prepare yourself for a long installation, as Stan will need numerous packages. Finally, depending on your R installation, you might have to restart R, but in general it is not necessary.
-Finally, load RStan like any other package:
+安装过程可能会很长。Stan需要大量的程序包。最后，根据R语言的安装不同，R环境可能会重启，但是通常来说并不需要。 
+
+加载`RStan`，方法和别的程序包类似：
 
 ```{r,eval=F}
 library(rstan)
 ```
 
-You should see an introductory message such as this, telling you Stan is ready:
+你应该会看到介绍信息，如下，告诉你Stan已经准备好了：
 
 ```{r,eval=F}
 Loading required package: ggplot2
@@ -3505,26 +3502,31 @@ rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 ```
 
-### RStan的简单例子
+### `RStan`的简单例子
 
-We show here some basic possibilities in RStan. The reader is encouraged to read more about it and try more examples.
-RStan is based on a probabilistic programming language used to describe the Bayesian models. For example, we can make a simple univariate Gaussian model:
+我们介绍一些`RStan`中的基本概率。我们鼓励读者了解更多的信息，尝试更多的例子.
+
+`RStan`基于一种描述贝叶斯模型的概率编程语言、例如，我们可以生成一个简单的单变量高斯模型：
 
 ```{r,eval=F}
-parameters {
-real y; }
-model {
+parameters 
+{
+   real y; 
 }
- y ~ normal(0,1);
+
+model 
+{
+  y ~ normal(0,1);
 }
 ```
-This code is Stan code, not R code. Then, in R, we can simulate this model, by doing:
+
+这是Stan代码，不是R代码。我们也可以使用R语言模拟这个模型：
 
 ```{r,eval=F}
 fit = stan(file='example.stan')
 ```
 
-The model will be simulated using an MCMC algorithm and the results are displayed using:
+这个模型会使用一个MCMC算法模拟生成，结果可以打印出来：
 
 ```{r,eval=F}
 print(fit)
@@ -3534,72 +3536,83 @@ post-warmup draws per chain=1000, total post-warmup draws=4000.
       mean se_mean   sd  2.5%   25%   50%   75% 97.5% n_eff Rhat
 y     0.00    0.03 0.98 -1.93 -0.63 -0.01  0.64  1.98  1191    1
 lp__ -0.48    0.02 0.69 -2.35 -0.63 -0.20 -0.05  0.00  1718    1
+
 Samples were drawn using NUTS(diag_e)
 For each parameter, n_eff is a crude measure of effective sample size,
 and Rhat is the potential scale reduction factor on split chains (at
 convergence, Rhat=1).
 ```
 
-It's interesting to see that this package has indeed a warm-up procedure as we saw before and it tries to compute an estimate of the effective sample size for a simple Gaussian. The value of 1191 (the n_eff column) is not too far from the examples we saw in the previous section.
-[ 164 ]
+有意思的是，这个程序包确实包含一个之前看到的热身过程，它会计算简单高斯分布的有效样本规模的估计。这个值是1191（`n_eff`列），与我们在之前章节中看到的结果相差不大。
 
 ## 小结
 
-In this chapter, we saw the second (and presumably most successful) approach to performing Bayesian inference, with algorithms such as rejection and importance sampling, which are based on the use of a proposal distribution simpler than the one we want to estimate.
-These two algorithms are usually ef cient with low-dimensional cases but suffer from long convergence problems, when they converge at all, in high dimensions.
-We then introduced the most important algorithm in Bayesian inference: the MCMC method using the Metropolis-Hastings algorithm. This algorithm is extremely versatile and has a nice property: it converges toward the distribution one wants to simulate. However, it needs careful tuning in order to converge, but its convergence is guaranteed in theory.
-In the next chapter, we will explore the most standard statistical model ever: linear regression. While it seems beyond the scope of this book, this model is so important that it needs to be introduced. However, we will not stop at the simple form of it but will explore its Bayesian interpretation, how it can be represented as a probabilistic graphical model, and what bene t we get from doing so.
+在这一章中，我们看到了第二个（可能是最成功的）执行贝叶斯推断的方法。方法使用拒绝采样和重要性采样，它们都使用比目标分布简单的分布作为建议分布。
 
+这列两个算法通常在低维问题中非常有效。但是在高维问题中，它们收敛起来花费的时间很长。
+
+我们介绍了贝叶斯推断中最重要的算法：使用Metropolis-Hastings算法的马尔科夫蒙特卡洛方法。这个算法通用性很强，而且有很好的性质：算法会收敛到目标分布。但是，要快速收敛，需要我们仔细调节参数。但是理论上算法肯定可以收敛。
+
+在下一章中，我们会研究最标准的统计模型：线性回归。它似乎超出了本书的范围，但是这个模型太重要了，还是需要介绍一下。但是，我们仅仅介绍它的简单形式，转而研究它的贝叶斯解释，即线性回归如何用一个概率图模型表示，我们可以从中得到哪些启示。
   
 -------
 
 # 第6章 贝叶斯建模——线性模型
-A linear regression model aims at explaining the behavior of one variable with another one, or several others, and by so doing, the assumption is that the relationship between the variables is linear. In general, the expectation of the target variable, the one you need to explain, is an af ne transform of several other variables.
-Linear models are presumably the most used statistical models, mainly because
-of their simplicity and the fact they have been studied for decades, leading to all possible extensions and analysis one can imagine. Basically all statistical packages, languages, or software implement linear regression models.
-The idea of the model is really simple: a variable y is to be explained by several other variables xi by assuming a linear combination of x's—that is, a weighted sum of x's.
-This model appeared in the 18th century in the work of Roger Joseph Boscovich. Then again, his method has been used by Pierre-Simon de Laplace, Adrien-Marie Legendre, and Carl Friedrich Gauss. It seems that Francis Galton, a mathematical genius of the 19th century, coined the term "linear regression".
-The model is generally written as a linear combination of variables as follows: y = β0 + β1x1 + β2x2 + ... + βnxn + ε.
-Here, y is the variable to explain, the x's are the explaining variables, and ε is a random noise that can be explained by the x's. It is generally a Gaussian-distributed random variable of mean 0 and variance σ2.
-What does it mean in practice? The intuition behind this model is that each x after being rescaled will contribute a little bit to y. In other words, y is made of a sum of little pieces, each being an x.
-[ 167 ]
-  
-Bayesian Modeling – Linear Models
-There are many ways to estimate the value of the parameters from a dataset, and obviously in many situations the value of each parameter is of the utmost importance and needs to be carefully studied. The most used method is the least square
-method in which one tries to minimize the difference between the real y and its approximation by a sum of x's. Indeed, representing y as a sum of other variables is, as with many models, just an approximation of the reality. Many mathematical tools and algorithms have been developed for linear regression to answer the question of the quality of the model and its parameters.
+
+线性回归模型力求解释一个变量在另一个变量或其他一些变量存在情况下的行为。模型假设变量之间的关系是线性的。通常，目标变量，也就是需要解释的变量，的期望是其他变量的仿射变换。
+
+线性模型可能是用途最广的统计模型，主要是因为它简单明了，而且也经过了几十年的研究，提出了所有可能的扩展和分析模型。所有的统计程序包，语言，或者软件都可以 实现线性回归模型。
+
+这个模型的思想很简单：变量$y$需要被一些变量$x$解释，或者说是被$x$的线性组合，——带权重的$x$的总和解释。
+
+这个模型诞生于18世纪Roger Joseph Boscovich的工作中。然后，Pierre-Simon de Laplace，Adrien-Marie Legendre和Carl Friedrich Gauss都使用了这个方法。19世纪的数学天才Francis Galton可能是第一个使用"线性回归"这个词的人。
+
+这个模型可以简单的写成变量线性组合的形式，如下：
+
+$$y =\beta_0 +\beta_1 x_1 + \beta_2 x_2 + ... + \beta_n x_n + \epsilon$$
+
+这里，$y$是要解释的变量，$x$是用来解释变量，$\epsilon$是可以被$x$解释的随机噪声。这个噪声通常是平均值为0，方差为$\sigma^2$高斯分布随机变量。
+
+那么，在实际问题中这个公式的是什么意思？模型背后的直觉告诉我们，每一个被重新kehuade$x$都对$y$产生一点贡献。换句话说，$y$是有一些局部值$x$求和得到的。
+
+有很多方法都可以从数据集估计参数的值。在很多情况下，每一个参数的值很明显是最重要的工作，需要仔细研究。最常用的方法是最小二乘法，它试图最小化真实$y$值与$x$总和估计值之间的差异。事实上，和其他许多模型一样，把$y$表示成其他变量的和，是对实际值的近似。人们提出了许多数学工具和算法来回答线性回归的模型质量和参数质量。
 
 ```
-The word difference is just an analogy. In this case, the correct term is mean squared error, of course.
+词语“差异”只是一个类比。在这个例子中，正确的说法应该是均方误差。
 ```
 
-In this chapter, we will quickly cover the basics of linear regression. A full-scale study would be beyond the scope of this book and we assume the reader has been exposed to such models before.
-The aim of this chapter is to go further and give a Bayesian  avor to the linear regression. In fact, in the standard model, one only focuses on the expectation of
-y and the parameters. But as soon as each of these components is considered as a random variable, it is possible to explain the linear regression in a Bayesian way and open oneself to many new techniques and bene ts of dealing with full-probability distribution instead of just their expectations.
-We will review the following elements in this chapter:
+在本章中，我们会很快的介绍线性回归的基础知识。全方位的线性回归知识已经超出了本书的范围，我们假设读者之前接触过这个模型。
 
-* What is a linear regression and how to use it in R?
-* What are the main hypotheses in a linear regression and what to do when they break?
-* How to compute the parameters by hand and in R
-* How to interpret a linear regression as a probabilistic graphical model
-* How to estimate the parameters in the Bayesian way and what's the benefit of doing so?
-* A review of R packages for Bayesian linear regression
-* What is over-fitting, why is it so important to avoid it, and what is the Bayesian solution to it?
-[ 168 ]
-       
+本章目的在于进一步给出线性回归的贝叶斯解释。事实上，在标准模型中，我们只关注$y$和参数的期望。但是，如果我们把每一个模块都当做一个随机变量，线性回归模型就可以用贝叶斯的思想解释，进而可以从中学到许多新的技术，以及处理全概率分布而不仅仅期望带来的好处。
+
+我们会在本章中学到以下内容：
+
+* 什么是线性回归？在R语言中如何使用这个模型？
+* 线性回归模型的主要假设是什么？当假设不成立时，怎么办？
+* 如何手动和使用R语言计算参数？
+* 如何用概率图模型解释线性回归？
+* 如何使用贝叶斯方法估计参数？这样做的好处是什么？
+* 贝叶斯线性回顾的R程序包介绍
+* 什么是过拟合？为什么避免过拟合很重要？什么是贝叶斯方案？
+
 ## 线性回归
+我们首先看一下统计中最简单，最常用模型。它会拟合数据集上的一条直线。我们假设有一个$(x_i, y_i)$的值对集合，其中的值对都是独立同分布的。 我们希望找到一个模型满足：
 
-We start by looking at the most simple and most used model in statistics, which consists of  tting a straight line to a dataset. We assume we have a data set of pairs (xi, yi) that are i.i.d and we want to  t a model such that:
-y = βx +β0 + ε
-Here, ε is a Gaussian noise. If we assume that xi ε Rn then the expected value can also
-be written as:
-yˆ=β0+∑n xiβi i=1
-Or, in matrix notation, we can also include the intercept β0 into the vector of parameters and add a column on 1 in X, such that X = (1, x1, ..., xn) to  nally obtain:
-ŷ = XTβ
-The following  gure shows an example (in one dimension) of a data set with its corresponding regression line:
+$$y = \beta_x + \beta_0 + \epsilon$$
+
+这里$\epsilon$是高斯噪音。如果我们假设$x_i \in R^n$，那么期望值可以写成：
+
+$$\hat{y}= \beta_0+ \sum^n_{i=1} x_i \beta_i $$
+
+或者使用矩阵记法，我们也可以把截距$\beta_0$方法到一个参数向量中，并在$X$中添加值为1的列，使得$X = (1, x_1, ..., x_n)$，最终有：
+
+$$\hat{y} = X^T\beta$$
+
+下列图形给出了一个数据集的示例，并带有相应的回归直线：
 
 ![](figures/169_1.png)
 
-In R,  tting a linear model is an easy task, as we will see now. Here, we produce a small data set with an arti cial number, in order to reproduce the previous  gure. In R, the function to  t a linear model is lm() and it is the workhorse of this language in many situations. Of course, later in this chapter we will see more advanced algorithms:
+我们会马上看到，在R环境中，拟合一个线性回归模型是很简单的。这里，我们使用人工数字生成一个小数据集，以便重新生成之前的图形。R语言中，拟合线性模型的函数是`lm()`，它是许多问题的主要工作函数。当然，我们还会在这一章中介绍更加先进的算法：
 
 ```{r,eval=F}
   N=30
@@ -3611,8 +3624,11 @@ xx=seq(0,20,1)
 lines(xx,xx*m$coefficients[2]+m$coefficients[1],col=2,lw=2)
 ```
 
-In this example, we generate 30 random points between 0 and 20. Then we compute y, on a straight line of slope 1.2 and intercept 4, adding a random noise, with zero mean at a variance of 4.
-We compute the model in m with the function lm(). Finally we plot the result. Printing the variable m gives the following result:
+在这个例子中，我们生成了0到20之间的30个随机数据点。然后，我们在斜率为1.2，截距为4的直线上计算`y`，并添加一个随机噪声，其平均值是0，方差是4。
+
+我们使用函数`lm()`计算模型`m`。最后我们画出结果。
+
+打印出`m`的参数，可以看到以下结果：Finally we plot the result. Printing the variable m gives the following result:
 
 ```{r,eval=F}
 Call:
@@ -3622,98 +3638,103 @@ Coefficients:
       3.919        1.238
 ```
 
-Here we see that the intercept is 3.919, close to the value of 4, and the slope is 1.238, also close to 1.2. As we added an important noise (of variance 4), it is not surprising to see a difference between the theoretical model and the  tted model.
+我们看到截距是3.919，很接近4；斜率是1.238，也很接近1.2。因为我们添加了随机噪声（方差为4），理论模型和实际拟合模型之间存在差异，这并不奇怪。
 
 ### 估计参数
 
-In order to estimate the parameters, we need a discrepancy measure, or in other words, a function that measures some sort of difference between the model and the data set. Of course, the goal is to minimize this difference. Here the word difference has a very broad meaning and many functions could work. However, it has been found that one of the most useful and practical is the mean squared error de ned by:
- 21∑N(∑n 2 MSE= Y−XTβ 2 =N i=1 yi − j=1xjβj)
-[ 170 ]
-       
-Chapter 6
-To estimate the parameters of the model, we resort to a method we saw earlier, called the maximum likelihood. The likelihood is the probability of observing a data set given some parameters, in this case. We assume as usual the data are identically and independently distributed. This allows us to write the maximum likelihood as follows:
-ˆ
-θ =argmaxθ p(D|θ)
-Here, θ is the set of all parameters θ = {β1, ...βp}.
-Basically we want to  nd the parameters that maximize this probability. As we
-assume i.i.d data, we can write:
-ˆ ∏N
-instead of a big product:
-ˆ ∑N
-θ=argmaxθ i=1 p(yi |xiθ)
-Next, we need an analytical form for the probability and in the linear regression, we saw the target data is Gaussian distributed as follows:
-p(y | xθ) = N(y | XTθ, σ2)
-If in the log-likelihood we replace the probability with the density function of a Gaussian, we will obtain:
- θ=argmaxθ i=1 p(yi |xiθ)
-Then, to simplify the computations we take the log-likelihood and have a sum
-⎡ 1 ⎛ T 2⎞⎤ N ⎢⎛ 1 ⎞2 ⎜−(yi−βXi)⎟⎥
- logL(θ)=∑i=1log⎢⎜2πσ2 ⎟ exp⎜ 2σ2 ⎣⎝⎠⎝ ⎠⎦
-⎟⎥
-⎡ 1 ⎛ T 2⎞⎤
-  N⎢ ⎛1⎞2 ⎜−(yi−βXi)⎟⎥
- =∑i=1⎢log⎜2πσ2 ⎟ +logexp⎜ 2σ2 ⎣⎝⎠⎝ ⎠⎦
-⎟⎥
-  12
-(y −β X ) N ⎛ 1 ⎞2 N i T i
- =∑i=1log⎜2πσ2 ⎟ −∑i=1 2σ2 ⎝⎠
-  N11∑N 2
-= 2 log2πσ2 −2σ2 i=1(y −βT X ) ii
-   [ 171 ]
+为了估计参数，我们需要偏离度量。或者说，我们需要函数度量模型和数据集之间的差异。当然，我们的目标是最小化差异。这里词语“差异”的含义很宽泛，许多函数都可以计算这个差异。但是，人们发现最有用，最实际的函数是均方误差，定义如下：
+
+$$MSE=\Vert Y−X^T \tilde{\beta}\Vert^2_2 = \frac{1}{N} \sum^N_{i=1}(y_i-\sum^n_{j=1} x_j \beta_j)^2$$
+
+要估计模型的参数，我们求助于之前的一个方法，最大似然率。在例子中，似然率表示给定一些参数，观测到数据集的概率。我们假设数据集依然是独立同分布的。这允许我们写出如下最大似然率函数：
+
+$$\hat{\theta} =argmax_{\theta} p(D \mid \theta)$$
+
+这里$\theta$是所有参数$\theta = \{\beta_1, ...\beta_p\}$的集合。
+
+我们希望找到所有参数最大化这个概率。 因为我们假设数据是独立同分布的，我们可以写出：
+
+$$\hat{θ} =argmax_θ \prod^N_{i=1} p(y_i \mid x_i \theta)$$
+
+然后，要简化计算，我们使用对数似然率，计算求和而不是求积：
+
+$$\hat{θ} =argmax_θ \sum^N_{i=1} p(y_i \mid x_i \theta)$$
+
+接着，我们需要概率的解析形式。在线性回归中，我们可以看到目标数据集是服从高斯分布的，如下：
+
+$$p(y \mid xθ) = N(y \mid X^T \theta, \sigma^2)$$
+
+如果使用对数似然率，我们把概率替换成使用高斯分布的密度函数，我们有：
+
+$$logL(\theta)=\sum^N_{i=1}log[(\frac{1}{2\pi\sigma^2})^{\frac{1}{2}} exp(\frac{-(y_i-\beta^T X_i)^2}{2\sigma^2})]$$
+$$=\sum^N_{i=1}[log(\frac{1}{2\pi\sigma^2})^{\frac{1}{2}} +log  exp(\frac{-(y_i-\beta^T X_i)^2}{2\sigma^2})]$$
+$$=\sum^N_{i=1}log(\frac{1}{2\pi\sigma^2})^{\frac{1}{2}} -\sum^N_{i=1}\frac{(y_i-\beta^T X_i)^2}{2\sigma^2}$$
+$$=\frac{N}{2}log\frac{1}{2\pi\sigma^2}-\frac{1}{2\sigma^2} \sum^N_{i=1}(y_i-\beta^T X_i)^2$$
+
+这个冗长的推导生成了最后等式中的两项，一个是常数，另一个依赖参数。因为我们的目的是最大化这个表达式，所以不失一般性，我们可以忽略常数项。同时由于对于大多数数值计算程序包，最小化表达式要比最大化简单。所以我们取表达式的负值：
+
+$$NLL(\theta) = \frac{1}{2}  \sum^N_{i=1}(y_i-\beta^T X_i)^2$$
  
-Bayesian Modeling – Linear Models
-This long development leads to two terms in the last equation; one is the constant and the other one depends on the parameters. As our goal is to maximize this expression, we can get rid of the constant term without loss of generality. And because it easier (in most numerical packages) to minimize a function than to maximize it, we will take the negative of this:
-N L L ( θ ) = 12 ∑ N ( y i − β T X i ) 2 i=1
-And we  nd the famous results again: the maximum likelihood estimator for a linear regression model is nothing but minimizing the square error!
-In order to  nd the solution, we need to do a bit more linear algebra again. First we write this expression in matrix form to make things simpler:
-1T NLL(θ)=2(y−Xβ) (y−Xβ)
-   Here, X is the design matrix—that is, the matrix of all the data set. Each row i of the matrix is a vector (x(i),..., x(i) ). This form is very convenient so that we deal with
-1p
-the sum from within the scalar product.
-After expanding this expression we obtain:
-NLL(θ)=1βT XT Xβ+1(yT y−yT Xβ−βT XT y) 22
-This again can be simpli ed. Indeed, we are only interested in the term dependent on the parameters. So the rest can be discarded. Moreover, we know that y ε RN and the same for βTXT so we can write yTXβ = βTXTy, which helps us to simplify the main expression again to  nally obtain:
-NLL (θ ) = 1 β T X T X β − β T X T y 2
-[ 172 ]
-     
-Chapter 6
-The minimum of this convex function is reached when its  rst derivative (in fact the Jacobian matrix) is equal to 0. So we derive it and obtain:
-∂NLL(θ)=(XT X)β−XT y ∂β
-Solving this equation to zero, the solution is  nally:
-ˆ −1 β=(XTX) XTy
-This is what the function lm() computes in R and most numerical languages or packages. However, we advise you not to implement it directly, especially when the data set is big. Indeed, inverting such a matrix like that could lead to a numerical instability that is hard to control.
-The main problem when doing linear regression arises when the parameters are not stable and a little change can have massive effects on parameters. This could be due to collinearity between parameters, parameters canceling each other, or many other reasons.
-One technique to solve this problem is known as shrinkage and its goal is to constrain the parameters to that they don't grow too far away. This usually gives better models with better predictive power. One simple approach to shrinkage is to put a Gaussian prior on the parameters. This technique is called ridge regression or L2 penalization.
-Practically speaking, we assume the following priors on the parameters:
-p(β)=∏jN(βj |0,τ2)
-Here, τ controls the amount of shrinkage one wants to apply to the model and the Gaussian distributions are zero-centered. The last point means we want the parameters not to go too far away from 0.
-So, the optimization problem to solve becomes the following:
-argmaxβ∑N logN(yi |β0 +βTxi,σ2)+∑D logN(βj |0,τ2)
-[ 173 ]
-  i=1
-j=1
-  
-Bayesian Modeling – Linear Models
-To be brief, we give the solution directly, because the calculus is similar to the previous development. The negative log-likelihood is therefore:
-2
- 1T2
-NLL(θ)= (y−XTβ)(y−XTβ)+λβ N
-     σ2
-The only difference, really, is that the last term: λ = τ 2 controls the amount of
-penalization. The higher this term, the more the parameters will be penalized when they grow too much. A good amount of penalization can lead some of the parameters to become close to zero. In that case, it can be a good idea to try to  t the model again without those parameters. In a sense, it is a method for variable selection. A large τ will reduce λ, which follows the intuition that, if the prior on the parameters has a large variance, then, a broad range of values can be reached. If the variance is, on the contrary small then only a smaller range will have a high probability to be reached.
-The solution to this optimization problem is:
-−1
-βridge =(λID +XT X) XT y
-Again, we advise you not to compute this directly in R but rather to rely on packages that have been speci cally implemented to be numerically stable. We recommend two packages:
+我们再次看到著名的结果：线性回归模型的最大似然估计就是最小化平方误差！
 
-* MASS with the function lm.ridge(), which is similar to lm()
-* glmnet with its function, glmnet()
+为了找到答案，我们需要做一些线性代数的工作。首先，我们把表达式写成矩阵的形式，以便计算更简单：
 
-The second package implements several algorithms. You can use it for ridge regression, and for L1-penalization (Lasso). In L1-penalization, instead of using a Gaussian prior on the parameters, we have a Laplace prior. The Laplace distribution is very peaky in the center and this has a particular effect: collinear parameters can reach the value 0 exactly. In that case, they are simply eliminated from the model. It's a very powerful variable selection method.
-However, the problem doesn't have an analytical solution and needs a speci c optimization algorithm to  nd the solution.
-[ 174 ]
-  
-Chapter 6
-In R, we can  t a model with lm() and glmnet() as follows, where we use the mtcars data set included in R directly, where we want to regress the variable mpg against the other variables:
+$$NLL(\theta)=\frac{1}{2}(y−X\beta)^T (y−X\beta)$$
+
+这里，$X$是设计矩阵，即所有数据集的矩阵。矩阵的每一行$i$是一个向量$(x^{(i)}_1,..., x^{(i)}_p)$。这种形式非常方便，我们可以在标量乘积内部处理求和。
+
+展开表达式，我们有：
+
+$$NLL(θ)=\frac{1}{2} \beta^T X^T X \beta+\frac{1}{2}(y^T y−y^T X \beta−\beta^T X^T y) $$
+
+这个表达式可以再次简化。实际上，我们只对依赖参数的项感兴趣。其他的都可以丢掉。而且，我们知道$y \in R^N$，$\beta^TX^T \in R^N$，所有我们可以写出$y^T X \beta = \beta^TX^Ty$，这样可以帮助我们简化表达，最终得到：
+
+$$NLL(\theta) = \frac{1}{2} \beta^T X^T X \beta − \beta^T X^T y$$
+
+凸函数的最小值在（雅克比矩阵的）一阶微分为0的时候出现。因此我能可以推导得出：
+
+$$\frac{\partial NLL(\theta)}{\partial \beta}=(X^T X)\beta−X^T y $$
+
+求解这个等式，最终有：
+
+$$\hat{\beta}=(X^TX)^{-1} X^Ty$$
+
+这就是R语言和大部分数值计算程序包中函数`lm()`计算的内容。然而，我们建议读者不要直接使用函数，特别是数据集很大的时候。事实上，操作大型矩阵可能导致数值的不稳定性，进而难以控制。
+
+做线性回归的主要问题会在参数不稳定的时候产生。一小点变动都有可能对参数产生巨大的影响。这可能是由于参数间的共线性，参数之间互相掩盖，或许多其他原因导致的。
+
+解决这个问题的方法是收缩技术，其目的是约束参数不要增长的太快。这通常可以保证模型有更好的预测能力。一个简单的方法是给参数添加先验高斯分布。这也叫做**岭回归**（ridge regression）或**L2惩罚**（L2 penalization）。
+
+实际情况下，我们假设参数的先验分布如下：
+
+$$p(\beta)=\prod_j N(\beta_j \mid 0,\tau^2)$$
+
+这里，$\tau$控制收缩的幅度，高斯分布是0中心的。我们不希望参数离0太远。
+
+因此，优化问题变成：
+
+$$argmax_{\beta} \sum^N_{i=1} log N(y_i \mid \beta_0 +\beta^T x_i,\sigma^2)+ \sum^D_{j=1} logN(\beta_j \mid 0,\tau^2)$$
+
+
+简单的说，我们直接给出了结论，因为计算和之前的推导类似。负对数似然率是：
+
+$$NLL(\theta)=\frac{1}{N} (y−X^T\beta)^T (y−X^T\beta)+\lambda \Vert \beta \Vert ^2_2$$
+    
+唯一的不同是最后一项：$\lambda = \frac{\sigma^2}{\tau^2}$控制惩罚的力度。这个项越大，参数的增长受惩罚越多。合适的惩罚力度可以保证一些参数接近于零。在这种情况下，不使用这些参数再次拟合模型不失为一个好的方案。某种意义上讲，这也是变量选取的方法。较大的$\tau$会降低$\lambda$。这也符合直觉，如果参数的先验具有较大的方差，那么取值范围也会很大。相反，如果方差很小，较小的取值范围才有较大的概率。
+
+优化问题的解就是：
+
+$$\beta_{ridge} =(\lambda I_D +X^T X) X^T y$$
+
+我们再次建议不要在R中直接计算这个等式，而是使用一些程序包，它们专门为数值稳定性做了优化。我们推荐两个程序包：
+
+* `MASS`，包含函数`lm.ridge()`，类似于`lm()`
+* `glmnet`，包含函数`glmnet()`
+
+第二个程序包实现了多个算法。你可以使用岭回归，也可以使用L1惩罚（Lasso）。在L1惩罚中，我们不使用高斯先验，而是用拉普拉斯先验。拉普拉斯分布的中心存在峰值，这有特殊的作用：具有共线性的参数会取值为0。这样，这些参数就完全从模型中消失了。这也是非常有用的变量选取方法。 
+但是，问题并不总是有解析解，我们需要专门的优化来找到答案。
+
+我们可以在R中使用`lm()`和`glmnet()`拟合模型，其中数据集为R环境中已有的`mtcars`。我们希望使用其他变量回归`mpg`:
 
 ```{r,eval=F}
 m1 <- lm( mpg ~ . , mtcars)
@@ -3721,18 +3742,21 @@ m1
 Call:
 lm(formula = mpg ~ ., data = mtcars)
 Coefficients:
-(Intercept)          cyl         disp           hp         drat
-wt
-   12.30337     -0.11144      0.01334     -0.02148      0.78711
--3.71530
+(Intercept)          cyl         disp           hp         drat         wt
+   12.30337     -0.11144      0.01334     -0.02148      0.78711   -3.71530
        qsec           vs           am         gear         carb
     0.82104      0.31776      2.52023      0.65541     -0.19942
-We can plot the model and see the theoretical line with the real data set:
+    
+```
+
+我们可以画出模型，看看理论回归曲线
+
+```{r,eval=F}
 yhat <- ( as.matrix(mtcars[2:10] ) %*% m1$coefficients[2:10] ) +
 m1$coefficients[1]
 ```
 
-Also note that we use the scalar product %*%: 
+注意我们使用标量乘法`%*%`：
 
 ```{r,eval=F}
 plot(sort(mtcars$mpg)); lines(sort(yhat),col=2)
@@ -3742,13 +3766,15 @@ plot(sort(mtcars$mpg)); lines(sort(yhat),col=2)
 
 ## 贝叶斯线性模型
 
-In this section, we are going to extend the standard linear regression model using the Bayesian paradigm. One of the goals is to put prior knowledge on the parameters of the models to help to solve the over- tting problem.
+在这一节中，我们会使用贝叶斯范式扩展标准的线性回归模型。其中一个目的是给出模型参数的d先验知识，解决过拟合问题。
 
 ### 模型过拟合
 
-One immense bene t of going Bayesian when doing a linear model is to have better control of the parameters. Let's do an initial experiment to see what happens when the parameters are completely out of control.
-We are going to generate a simple model in R and look at the parameters when they are  tted with the standard approach for linear models.
-Let's  rst generate some data points at random to obtain 10 variables and plot them:
+构建线性模型时使用贝叶斯的一个明显的好处是可以很好的控制参数。让我们先做一个实验，看看参数完全不可控会怎么样。
+
+我们会使用R生成一个简单的模型，看看参数在线性模型标准方法下的拟合情况。
+
+让我们随机生成10个数据点，画出它们：
 
 ```{r, eval=F}
    N <- 30
@@ -3759,9 +3785,10 @@ Let's  rst generate some data points at random to obtain 10 variables and plot t
 
 ![](figures/176_1.png)
 
-Next we generate the dependent variable following the model: y = Xβ + ε
+然后生成下列模型的依赖变量：
+$$y = X \beta + \epsilon$$
 
-Here, ε is a Gaussian noise of variance σ2. We use the following code in R and plot the variable y. As we use randomly generated numbers, your plot might be different from the one in this book:
+这里，$\epsilon$是方差为$\sigma^2$的高斯噪声。我们使用下列R代码，画出变量$y$。因为我们是随机生成的数据，读者的图形有可能和书中的不同：
 
 ```{r, eval=F}
 sigma <- 10
@@ -3772,44 +3799,39 @@ plot(y, t='l')
 
 ![](figures/177_1.png)
 
-Then we estimate the coef cients of the model with the lm() function:
+然后，我们使用函数`lm()`估计模型的系数:
 
 ```{r, eval=F}
 model <- lm(y~., data=data.frame(X[,2:ncol(X)]))
 beta_hat <- model$coefficients
 ```
 
-We plot the true coef cients and the estimated coef cients to see, visually, how close they are. And the result is ... not good!
+我们画出真正的系数，和估计的系数。结果并不好！
 
 ![](figures/178_1.png)
 
-If we have a closer look at the values, we can clearly see that the model tried to use all the variables when we gave them a zero coef cient in the true model. Moreover, it tried to compensate between all the variables, hence the positive and negative values all along the vector of parameters. Your results might be different from the values shown here, because we use random data, but the behavior will be similar:
+如果我们仔细看一下参数值，我们可以明显发现，当真实模型的系数为0时模型试图使用所有的变量。而且，模型试图补偿所有的变量，因为参数向量包含正值和负值。结果可能有些许不同，因为我们使用随机数据，但是行为都是类似的：
 
 ```{r, eval=F}
 > true_beta
 [1] 10 -3  0  8  0  0  0  0  0
 > beta_hat
-(Intercept)           x          V2          V3          V4          V5
-V6          V7          V8
-  10.012121  -30.091272
- 6.844616    4.410177
- 8.904295   62.005179  -12.913125  -28.102293
--1.154756
+(Intercept)           x         V2          V3        V4          V5          V6          V7         V8
+  10.012121  -30.091272   6.844616    4.410177  8.904295   62.005179  -12.913125  -28.102293  -1.154756
 ```
 
-In fact, most of the values are terribly wrong. This is a perfect example of over- tting. The model tried to  t the data perfectly, ending in something completely off:
+事实上，大部分值都是错误的。这是过拟合的典型例子。模型试图完美拟合数据，然而最终却事与愿违：
 
 ```{r, eval=F}
 > true_beta
 [1] 10 -3 0 8 0 0 0 0 0
 > beta_hat
- (Intercept) x V2 V3 V4 V5 V6 V7 V8
-10.012121 -30.091272 8.904295 62.005179 -12.913125 -28.102293
-6.844616 4.410177 -1.154756
+ (Intercept)       x       V2        V3         V4         V5        V6       V7        V8
+10.012121 -30.091272 8.904295 62.005179 -12.913125 -28.102293  6.844616 4.410177 -1.154756
 ```
 
   
-In this case, we knew the true values beforehand but, in practice, we try to  t a model on a dataset to  nd out good values for the parameters. As we saw in the previous section, one good technique is called regularization and it is equivalent to placing prior distribution on the parameters. By doing so, we somehow constrain the parameters to stay within an acceptable range of values, with a higher probability.
+在这个例子中，我们已经提前知道取值。但是在实际问题中，我们需要在数据集上拟合模型，找出参数的合适取值。正如我们在之前的章节中看到的，一个方法是正则化，它相当于给参数设置先验分布。通过这个手段，我们可以一定程度的约束参数待在一个可以接受的高概率的取值范围中
 
 ### 线性模型的图模型
 
