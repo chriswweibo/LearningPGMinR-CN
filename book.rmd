@@ -3835,7 +3835,8 @@ beta_hat <- model$coefficients
 
 ### 线性模型的图模型
 
-继续探讨之前，Before going further, we need to visualize the structure of a linear mode and better understand the relationships between variables. We can, of course, represent it as a probabilistic graphical model.
+继续探讨之前，我们需要可视化模型的结构，更好的理解变量之间的关系。我们可以把它表示成一个概率图模型。
+
 The linear model captures the relationships between observable variables x and a target variable y. This relation is modeled by a set of parameters θ. But remember the distribution of y for each data point indexed by i:
 yi ~ N(Xiβ, σ2)
 Here, Xi is a row vector for which the  rst element is always 1 to capture the intercept of the linear model. If you look at earlier pages in this chapter, you will realize that the linear model has been written with many different forms that are all equivalent. We leave it to the reader as an exercise to show they are all equivalent. For example, Xi could be a column vector, and so on.
