@@ -3837,22 +3837,28 @@ beta_hat <- model$coefficients
 
 继续探讨之前，我们需要可视化模型的结构，更好的理解变量之间的关系。我们可以把它表示成一个概率图模型。
 
-The linear model captures the relationships between observable variables x and a target variable y. This relation is modeled by a set of parameters θ. But remember the distribution of y for each data point indexed by i:
-yi ~ N(Xiβ, σ2)
-Here, Xi is a row vector for which the  rst element is always 1 to capture the intercept of the linear model. If you look at earlier pages in this chapter, you will realize that the linear model has been written with many different forms that are all equivalent. We leave it to the reader as an exercise to show they are all equivalent. For example, Xi could be a column vector, and so on.
-So our  rst graphical model could be as follows:
+线性模型捕捉了可观测变量$x$与目标变量$y$之间的关系。这个关系通过几个参数集合$\theta$建模出来。注意每一个数据点的$y$分布通过$i$索引： 
+
+$$y_i \sim N(X_i\beta, \sigma^2)$$
+
+这里，$x_i$是行向量，其中第一个元素是1，用以刻画线性模型的截距。如果回顾一下本章的开始，读者可以发现线性模型可以写成多个等价的形式。我们建议读者联系证明这些形式都是等价的。例如，$X_i$可以是列向量等。
+
+我们的第一个图模型如下：
 
 ![](figures/179_1.png)
 
-The parameter θ is itself composed of the intercept, the coef cients β for each component of X, and the variance σ2 in the distribution of yi.
+参数$\theta$本身由截距，$X$每个成分的系数$\beta$，以及$y_i$分布的方差$\sigma^2$构成。 
 
-So, this decomposition leads us to a second version of the graphical model in which we explicitly separate the components of θ:
+所以，根据这样的分解，我们得到第二个图模型版本。它清楚的分解了$\theta$的成分：
 
 ![](figures/180_1.png)
 
-  We introduce again plate notation in probabilistic graphical models. When a rectangle is drawn around a set of nodes with a number or a variable in a corner (N for example), it means the same graph is repeated many times.
-The likelihood function of a linear model is:
-L(θ)=∏N p(yi |Xi,β,σ) i=1
+我们再次使用概率图模型中的*平板表示法*。当矩形包裹一些节点，并在角落中标记数字或变量（例如N），它的意思是同一个图形重复很多次。
+
+线性模型的似然函数是：
+
+$$L(\theta)=\prod^N_{i=1} p(y_i \mid X_i,\beta,\sigma)$$
+
 This form is representable as a graphical model and, based on the previous graph, we  nally have:
 
 ![](figures/180_2.png)
@@ -3881,15 +3887,28 @@ a distribution that has a zero mean, is symmetric, and has an in nite support. T
 Bayesian Modeling – Linear Models
 Given all these reasons, the Gaussian distribution seems to be a good candidate for our purpose.
 The conditional distribution for y is as usual:
-p(yi |Xiβσ2)=N(yi |Xβ,σ2)
- We remember we saw that the Maximum Likelihood Estimator (MLE) is: ˆ −1
-β=(XTX) XTy
+
+$$p(y_i \mid X_i\beta \sigma^2)=N(y_i \mid X \beta,\sigma^2)$$
+
+ We remember we saw that the Maximum Likelihood Estimator (MLE) is: 
+ 
+$$\hat{\beta}=(X^TX)^{-1} X^Ty$$
+
 And the estimator for the variance can also be estimated (left as an exercise) and is:
-1∑N( ˆ 2 σˆ=N i=1 yi−βTXi)
+
+$$\hat{\sigma}=\frac{1}{N}\sum^N_{i=1}(y_i−\hat{\beta}^TX_i)^2$$
+
 The good thing about having a Gaussian prior on the parameters is that it is conjugate to the likelihood function. It means that the posterior of the parameters is also a Gaussian distribution such that:
- Here:
-p(β | yXστ)∝ p(y|βXστ)p(β |τ)= N(β |m,S) m=σ−2SXT y
-−1 S = (τ I + σ −2 X T X )
+
+
+$$p(\beta \mid yX\sigma\tau) \propto  p(y|\beta X\sigma \tau)p(\beta|\tau)= N(\beta|m,S)$$
+
+这里
+
+$$m=\sigma^{−2}SX^T y$$
+
+$$S = (\tau I +\sigma^{−2} X^T X )^{-1}$$
+
 Here we  nd again the τ parameter, which controls how large the prior is on the parameters. It is the same parameter τ we used in the previous section on ridge regression. In fact, it can be shown that having Gaussian priors on the parameter β and the ridge regression are equivalent. The reader is encouraged to take the previous two formulas and calculate again the ridge regression to see the relation between the two.
 [ 182 ]
   
@@ -3897,12 +3916,18 @@ Chapter 6
 Finally, the last thing we need to do is to compute the posterior predictive distribution. The posterior predictive distribution is the distribution of an unknown y when some Xs have been observed after computing the parameters. It is basically making a prediction with a model that has been learned with the previous method.
 The reason it is important is because we do a complete Bayesian treatment of the problem, instead of a pure statistical one. In the standard linear model, the scalar product of X and β is suf cient to compute the expected value of y when we wish to make a prediction.
 In other words, after  nding the β parameters we simply do:
-yj =∑N xi.βi i=1
+
+
+$$y_j =\sum^N_{i=1} x_i\beta_i$$
+
 But because here we have a full Bayesian model, instead of just having the expectation of y, we have the full probability distribution. As we will see, the posterior distribution is also a Gaussian, and a Gaussian is de ned by its mean and variance. Therefore,
 by using a full Bayesian model, we also compute the posterior variance and have an estimation of the uncertainty of the prediction:
  Here:
-p ( y ′ | yτ σ 2 X ) = ∫ p ( y ′ | β σ 2 ) p ( β | yτ σ 2 ) d β = N(y′|mT X′,σ2 (X′))
-σ2(X′)=σ2 +X′TSX′
+$$p ( y^\prime |y \tau \sigma^2 X ) = \int p(y^\prime| \beta \sigma^2) p (\beta|y \tau \sigma^2 ) d\beta = N(y^\prime|m^T X^, ,\sigma^2 (X^\prime))$$
+
+这里
+
+$$\sigma^2 (X^\prime)=\sigma^2 +X^{\prime T}SX^\prime$$
 X' and y' are respectively the new observed data upon which we want to do the prediction y'.
 [ 183 ]
   
@@ -4062,16 +4087,14 @@ In fact, it increases with the size of the matrix, when more errors accumulate. 
 With a perfect inverse matrix, the distance would be zero all the time and therefore the log would be—in nite. So this simple example tells us that in Bayesian linear regression we can have problems when inverting the matrix X. We therefore need a better algorithm.
 Here we present a simple algorithm to solve the ridge regression problem with a numerically stable solution. The idea is to transform the problem of matrix inversion into a simpler problem to solve, where the matrix to inverse is triangular.
 If X is the matrix containing the data points, and y the vector containing the target, the idea is to  rst extend the matrix and the vector y as follows:
-⎛X⎞ X=ˆΛ=I
-   ˆ
-⎛yσ⎞11 ⎜Λ⎟andy=⎜0 ⎟where τ andΛ=τ2I
-    ⎝⎠⎝D⎠
-[ 190 ]
- 
-Chapter 6
+
+$$\hat{X}=\lgroup \begin{matrix} X  \\ \sqrt{\Lambda}  \end{matrix} \rgroup 和
+\hat{y}=\lgroup \begin{matrix} y/\sigma \\ 0_D  \end{matrix} \rgroup
+其中\sqrt{\Lambda}=\frac{1}{\tau}I，\Lambda=\frac{1}{\tau^2}I$$
 The next step is to do a QR decomposition of Xˆ and the last step is to compute the inverse of R, which is easier because it's an upper triangular matrix. Finally, the coef cients of the linear regression are given by:
-ˆ
-β = R − 1 Q T yˆ
+
+$$\hat{\beta}=R^{-1}Q^T \hat{y}$$
+
 The algorithm in R can be implemented as follows:
 
 ```{r, eval=F}
