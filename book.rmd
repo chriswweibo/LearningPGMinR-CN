@@ -3859,20 +3859,18 @@ $$y_i \sim N(X_i\beta, \sigma^2)$$
 
 $$L(\theta)=\prod^N_{i=1} p(y_i \mid X_i,\beta,\sigma)$$
 
-This form is representable as a graphical model and, based on the previous graph, we  nally have:
+这个形式可以用图模型表示，基于之前的图形，我们有：
 
 ![](figures/180_2.png)
 
- In this graph, it is clearly stated that each yi is dependent on one xi. It is also clear that the parameters θ = {β,σ} are all shared as they are outside the plate.
-[ 180 ]
-  
-Chapter 6
-For the sake of simplicity, we will keep β as a vector, but you could also decompose it into its univariate components and use the plate notation for those:
+在这个图中，我们可以说每一个$yi$都依赖于一个$x_i$。很明显，参数$\theta= \{\beta，\sigma\}$由于在矩形外，因此是共享的。
+
+为了简单起见，我们会把$\beta$保存为向量，但是读者也可以把它分解成单变量成分，使用平板表示法：
 
 ![](figures/181_1.png)
 
 
-In the last two iterations of the graphical model, we see that the parameter β could have a prior probability on it instead of being  xed. In fact, the parameter σ can also be considered as a random variable. For the time being, we will keep it  xed.
+在图模型的最后两步迭代中，我们看到参数$\beta$有一个先验分布，而不是固定数值。事实上，参数$\sigma$也可以当做一个随机变量。而我们暂时固定这个值。
 
 ### 后验分布
 
@@ -4088,8 +4086,8 @@ With a perfect inverse matrix, the distance would be zero all the time and there
 Here we present a simple algorithm to solve the ridge regression problem with a numerically stable solution. The idea is to transform the problem of matrix inversion into a simpler problem to solve, where the matrix to inverse is triangular.
 If X is the matrix containing the data points, and y the vector containing the target, the idea is to  rst extend the matrix and the vector y as follows:
 
-$$\hat{X}=\lgroup \begin{matrix} X  \\ \sqrt{\Lambda}  \end{matrix} \rgroup 和
-\hat{y}=\lgroup \begin{matrix} y/\sigma \\ 0_D  \end{matrix} \rgroup
+$$\hat{X}=( \begin{matrix} X  \\ \sqrt{\Lambda}  \end{matrix} ) 和
+\hat{y}=( \begin{matrix} y/\sigma \\ 0_D  \end{matrix} )
 其中\sqrt{\Lambda}=\frac{1}{\tau}I，\Lambda=\frac{1}{\tau^2}I$$
 The next step is to do a QR decomposition of Xˆ and the last step is to compute the inverse of R, which is easier because it's an upper triangular matrix. Finally, the coef cients of the linear regression are given by:
 
