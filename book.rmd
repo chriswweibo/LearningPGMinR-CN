@@ -3874,29 +3874,29 @@ $$L(\theta)=\prod^N_{i=1} p(y_i \mid X_i,\beta,\sigma)$$
 
 ### 后验分布
 
-Many prior distributions could be used for β but they need to be tractable or simply have an appropriate meaning in the context of a linear regression. Here we need
-a distribution that has a zero mean, is symmetric, and has an in nite support. The reasons are:
+许多后验概率看可以刻画$\beta$，但是需要易于操作或者在线性回归模型的问题中有恰当的含义。这里我们需要一个平均值为0，对称的，支持输入域为无穷的分布。原因如下：
 
-* Zero-mean because we want our parameters to be driven toward zero if possible; this is the shrinkage effect. So we give the highest mass of probability to the center at zero.
-* Symmetric because we want to give equal chances for positive and negative values. A priori, we don't know which direction the parameters will take.
-* Infinite support because we don't want to block the parameters to have certain values. Obviously, with most of the probability mass in the center, the tail of the distribution, despite having an infinite support, will have a low probability. So we are trying to force the model not to have huge values like we saw in the previous example.
-* The distribution needs to be simple enough that we can compute the posterior of the parameters and the predictive posterior of y.
+* 平均值为0，是因为我们希望参数尽可能的在0附近，这是收缩的作用。因此我们可以给以0为中心的值最大的概率。
+* 对称，是因为我们希望正值和负值的机会均等。一个先验知识是，我们并不知道参数会在哪个方向取值。 
+* 无穷输入，是因为我们不希望参数无法取到某些值。很明显，尽管支持无穷输入，但是由于靠近中心的值拥有较高的概率，分布的尾部拥有的概率较小。我们可以尝试像之前的例子一样，限制模型不取过大的值。
+* 分布需要足够简单，，以便我们可以计算参数的后验分布，和$y$的预测。
     
-Bayesian Modeling – Linear Models
-Given all these reasons, the Gaussian distribution seems to be a good candidate for our purpose.
-The conditional distribution for y is as usual:
+
+基于上述考虑，高斯分布似乎是一个合适的方案。
+
+$y$的条件概率如下：
 
 $$p(y_i \mid X_i\beta \sigma^2)=N(y_i \mid X \beta,\sigma^2)$$
 
- We remember we saw that the Maximum Likelihood Estimator (MLE) is: 
+回顾一下之前的最大似然估计（**Maximum Likelihood Estimator，MLE**） 
  
 $$\hat{\beta}=(X^TX)^{-1} X^Ty$$
 
-And the estimator for the variance can also be estimated (left as an exercise) and is:
+方差的估计如下（可以练习证明一下）：
 
 $$\hat{\sigma}=\frac{1}{N}\sum^N_{i=1}(y_i−\hat{\beta}^TX_i)^2$$
 
-The good thing about having a Gaussian prior on the parameters is that it is conjugate to the likelihood function. It means that the posterior of the parameters is also a Gaussian distribution such that:
+知道高斯先验的好处是它是似然函数的共轭表示。这意味着参数的后验分布也是一个高斯分布，使得：
 
 
 $$p(\beta \mid yX\sigma\tau) \propto  p(y|\beta X\sigma \tau)p(\beta|\tau)= N(\beta|m,S)$$
@@ -3907,40 +3907,39 @@ $$m=\sigma^{−2}SX^T y$$
 
 $$S = (\tau I +\sigma^{−2} X^T X )^{-1}$$
 
-Here we  nd again the τ parameter, which controls how large the prior is on the parameters. It is the same parameter τ we used in the previous section on ridge regression. In fact, it can be shown that having Gaussian priors on the parameter β and the ridge regression are equivalent. The reader is encouraged to take the previous two formulas and calculate again the ridge regression to see the relation between the two.
-[ 182 ]
-  
-Chapter 6
-Finally, the last thing we need to do is to compute the posterior predictive distribution. The posterior predictive distribution is the distribution of an unknown y when some Xs have been observed after computing the parameters. It is basically making a prediction with a model that has been learned with the previous method.
-The reason it is important is because we do a complete Bayesian treatment of the problem, instead of a pure statistical one. In the standard linear model, the scalar product of X and β is suf cient to compute the expected value of y when we wish to make a prediction.
-In other words, after  nding the β parameters we simply do:
+我们再次看到，控制先验分布规模的参数$\tau$。这和上一节中岭回归中的$\tau$是一样的。事实上，可以看到给出参数$\beta$的高斯先验与岭回归是等价的。读者可以用前两个公式，计算岭回归，看看二者的关系。
+
+最后一步是我们需要计算后验预测分布。后验预测分布是未知变量$y$在观察测到一些$X$值后的分布。这其实是一个分根据之前学习到的模型，进行预测的工作。
+
+这项工作很重要，是因为我们要完成一个完整的贝叶斯推断流程，而不仅仅是统计计算。在标准额线性模型中，$X$和$\beta$的标量乘积已经足够支持对$y$值的预测。
+
+或者说，找出参数$\beta$后，我们只需要：
 
 
 $$y_j =\sum^N_{i=1} x_i\beta_i$$
 
-But because here we have a full Bayesian model, instead of just having the expectation of y, we have the full probability distribution. As we will see, the posterior distribution is also a Gaussian, and a Gaussian is de ned by its mean and variance. Therefore,
-by using a full Bayesian model, we also compute the posterior variance and have an estimation of the uncertainty of the prediction:
- Here:
+但是，因为我们已经有了一个完整的贝叶斯模型，我们不仅有$y$的期望，还有完整的概率分布。正如我们马上看到的，后验分布也是一个高斯分布，而高斯分布可以通过平均值和方差定义。所以，使用完全贝叶斯模型，我们也可以计算后验方差，并对预测的未知性进行估计：
+
 $$p ( y^\prime |y \tau \sigma^2 X ) = \int p(y^\prime| \beta \sigma^2) p (\beta|y \tau \sigma^2 ) d\beta = N(y^\prime|m^T X^, ,\sigma^2 (X^\prime))$$
 
 这里
 
 $$\sigma^2 (X^\prime)=\sigma^2 +X^{\prime T}SX^\prime$$
-X' and y' are respectively the new observed data upon which we want to do the prediction y'.
-[ 183 ]
-  
-Bayesian Modeling – Linear Models
-Finally, we can draw the graphical model for the full Bayesian interpretation of the linear model:
+$X^\prime$是新观察到的数据，可以用来预测$y^\prime$。
+
+最后，我们可以画出线性模型完全贝叶斯解释的图模型：
 
 ![](figures/184_1.png)
 
-In fact, we only presented the case when the prior on β is Gaussian, but other priors such as a Laplace distribution can be used. This leads to an L1-penalization that doesn't have an analytical form. However, a very ef cient algorithm called the Lasso can be used to  nd the parameters. A very ef cient implementation of it can be found in the glmnet package.
+事实上，我们只给出了$\beta$时高斯分布时的例子，但是例如拉普拉斯分布等其他分布也是类似的。这可以产生L1惩罚的效果，其没有解析的形式。但是，一个有效的算法，**Lasso回归**，可以用来找到参数。我们可是使用程序包`glmnet`来快速实现。
 
 ### R语言实现
 
-Let's take an example from the beginning of this chapter again. When we tried to compute the parameters, we found strange values that were seriously off from their true value, meaning there was a problem in the estimation procedure. We saw that this problem is called over- tting.
-Then we looked at a solution by interpreting the linear model in the Bayesian framework and calculated the solutions of the problem.
-Implementing it is really easy when the priors on the parameters are Gaussian:
+让我们再回到本章开始时的例子。当我们尝试计算参数的时候，我们发现了严重偏离实际的数值，这说明在估计过程中存在问题。这个问题叫做过拟合。
+
+然后我们通过线性模型的贝叶斯框架找到了解决方案，计算了问题的答案。
+
+当参数是高斯分布时，代码实现起来很简单：
 
 ```{r,eval=F}
 dimension <- length(true_beta)
@@ -3950,52 +3949,52 @@ posterior_beta  <- sigma^(-2) * as.vector(posterior_sigma %*% (t(X) %*%
 y))
 ```
     
-The posterior parameters are now:
+后验参数变成：
 
 ```{r,eval=F}
  posterior_beta
-[1]  7.76069781 -0.06509725  1.18834799  2.72321814  0.16637478
-2.65759764
+[1]  7.76069781 -0.06509725  1.18834799  2.72321814  0.16637478  2.65759764
 [7] -0.10993147 -0.31961733  0.02273269
 ```
 
-This is far better than what we had before. But it is still not perfect. Indeed, the true β parameters are:
+这个结果比之前的好多了。但是依然不完美。真正的$\beta$是：
 
 ```{r,eval=F}
 true_beta <- c(10, -3, 0, 8, 0, 0, 0, 0, 0)
 ```
 
-And we can see that the second parameter is too small and many parameters are too high, with values going from 1 to 2 when they should be zero.
-Indeed, the penalization in the form of the lambda variable is too weak. It means the variance is too large. We can therefore give more penalization by doing:
+我们看到第二个参数太小，其他的参数又太大。它们的值在1和2之间，而实际应该为0。
+
+其实，以变量`lambda`表示的惩罚太弱了。这说明方差太大。因为我们可以给予更多的惩罚：
 
 ```{r,eval=F}
 lambda <- 0.5 * diag(0.1, dimension, dimension)
 ```
-We then recompute the results:
+
+然后计算结果：
 
 ```{r,eval=F}
  posterior_beta
-[1]  9.6677088 -0.7393309  1.1248994  3.5526708 -0.1869873  2.8805658
--0.3506464
+[1]  9.6677088 -0.7393309  1.1248994  3.5526708 -0.1869873  2.8805658  -0.3506464
 [8] -0.4582813  0.1190531
 ```
 
-It is not perfect but the intercept is now closer to 10 (9.66) and the second parameter now has a better value. The other parameters are still off but they are going in the right direction.
-We can penalize even more and run the same code again:
+结果还是不完美，但是截距已经接近10 (9.66)，第二个参数也比之前好。其他参数还不够好，但是优化方向是对的。
+
+我们可以给予更多的惩罚，并运行之前的代码：
 
 ```{r,eval=F}
 lambda <- 0.1*diag(0.1, dimension, dimension)
 posterior_sigma <- sigma^2 * solve(t(X) %*% X + sigma^2 * lambda)
-posterior_beta  <- sigma^(-2) * as.vector(posterior_sigma %*% (t(X) %*%
-y))
+posterior_beta  <- sigma^(-2) * as.vector(posterior_sigma %*% (t(X) %*% y))
 posterior_beta
-[1] 12.0750175 -3.8736938  0.6105363  8.0942494 -1.0959572  1.3938047
--0.1099443
+[1] 12.0750175 -3.8736938  0.6105363  8.0942494 -1.0959572  1.3938047 -0.1099443
 [8] -0.3496412  0.1280143
 ```
 
-Despite it not being perfect, we see that we are closer to the true solution. Needless to say, the example we used has been speci cally made to be hard to solve. Despite this, the Bayesian solution is able to converge to the true solution, where the simple linear regression was completely wrong.
-After running the previous model, we can plot the results with the following code:
+尽管不够完美，但是结果已经很靠近真正的答案。我们使用的这个例子其实并不容易求解。尽管如此，贝叶斯框架还是可以收敛到真正的答案，而简单的线性回归却是完全错误的。
+
+执行完模型计算，我们可以画出图形，代码如下：
 
 ```{r,eval=F}
 t <- seq(-2,2,0.01)
@@ -4005,51 +4004,45 @@ plot(x,y, xlim=c(-2,2), ylim=range(y, T%*%true_beta))
 lines(t,T%*%true_beta, col='black', lwd=3)
 lines(t,T%*%beta_hat,  col='blue',  lwd=3)
 lines(t,T%*%posterior_beta, col='red', lwd=3)
-legend('topleft', c('True function', 'OLS estimate', 'Bayesian
-estimate'), col=c('black','blue','red'), lwd=3)
+legend('topleft', c('True function', 'OLS estimate', 'Bayesian estimate'), col=c('black','blue','red'), lwd=3)
 ```
 
-The  rst two lines generate evenly spaced data points to draw the results. Then the  rst plot draws the dataset (little black circles). Then we draw three curves on it:
+前两行代码生成平均分割的数据点。第一个图形画出数据集（小黑圆圈）。然后我们在上边添加3个曲线：
 
-* In black: This is the true model as defined in the R program
-* In blue: This is the OLS estimate (the standard linear regression)
-* In red: This is the Bayesian estimate with the penalization we found earlier
+* 黑色曲线：R程序定义的真正的模型
+* 蓝色曲线: 这是OLS估计（标准线性回归）
+* 红色曲线: 这是带有之前惩罚策略的贝叶斯估计
 
-The blue curve (OLS estimate) tries to follow the data points as much as possible,  tting more noise and being far away from the true function. This is a good example of over- tting.
-On the contrary, the red curve (Bayesian estimate) did a good job  nding the true function that generated the data in the beginning:
+蓝色曲线（标准线性回归）试图经过所有的数据点，却拟合了更多噪音而偏离真正的函数。这是过拟合的典型例子。
+
+相反，红色曲线（贝叶斯估计）在找出真正函数的过程中表现良好：
 
 ![](figures/187_1.png)
 
-Now we want to add to this graph the 95% posterior predictive interval. Thanks to the Bayesian approach, we can easily compute it from the posterior distribution. Therefore the code in R will be as follows:
+现在我们想给这个图形添加95%的后验预测区间。得益于贝叶斯框架，我们可以轻松的算出这个区间。因此R代码如下：
 
 ```{r,eval=F}
-pred_sigma <- sqrt(sigma^2 + apply((T%*%posterior_sigma)*T, MARGIN=1,
-FUN=sum))
+pred_sigma <- sqrt(sigma^2 + apply((T%*%posterior_sigma)*T, MARGIN=1, FUN=sum))
 upper_bound <- T%*%posterior_beta + qnorm(0.95)*pred_sigma
 lower_bound <- T%*%posterior_beta - qnorm(0.95)*pred_sigma
 ```
 
-The previous code computes the upper and lower bound along the dataset we used. And  nally the following code draws the plot:
+上述代码根据数据集计算出上下边界。最终我们用下面的代码画出图形：
 
 ```{r,eval=F}
-plot(c(0,0),xlim=c(-2,2), ylim=range(y,lower_bound,upper_
-bound),col='white')
-polygon( c(t,rev(t)), c(upper_bound,rev(lower_bound)), col='grey',
-border=NA)
+plot(c(0,0),xlim=c(-2,2), ylim=range(y,lower_bound,upper_bound),col='white')
+polygon( c(t,rev(t)), c(upper_bound,rev(lower_bound)), col='grey', border=NA)
 points(x,y)
 lines(t,T%*%true_beta, col='black', lwd=3)
 lines(t,T%*%beta_hat,  col='blue',  lwd=3)
-[ 187 ]
-    
-Bayesian Modeling – Linear Models
+
 lines(t,T%*%posterior_beta, col='red', lwd=3)
-legend('topleft', c('True function', 'OLS estimate', 'Bayesian
-estimate'), col=c('black','blue','red'), lwd=3)
+legend('topleft', c('True function', 'OLS estimate', 'Bayesian estimate'), col=c('black','blue','red'), lwd=3)
 ```
 
 ![](figures/188_1.png)
 
-In this code we use the polygon function to draw the gray area representing the 95% predictive interval. We use the qnorm function to compute the values and you can play with theses values to change the interval.
+在这份代码中，我们使用`polygon`函数画出表示95%预测区间的灰色区域。我们使用`qnorm`函数计算数值，读者可以使用这些值改变区间。
 
 ### 一种稳定的实现
 
