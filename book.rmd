@@ -4046,15 +4046,12 @@ legend('topleft', c('True function', 'OLS estimate', 'Bayesian estimate'), col=c
 
 ### 一种稳定的实现
 
-In the previous implementation, we used the solve() function from R, but it is not always a good idea to inverse a matrix directly as it can quickly lead to numerical instability. As a quick example, here is a little piece of code that generates random invertible matrices and computes the Froebenius distance between an identity matrix and the result of the random matrix multiplied by its inverse. If M is a matrix and M-1 its inverse, then M.M-1=I. We see in this little example that it is not numerically the case:
+在之前的实现中，我们使用R中的`solve()`函数。但是对矩阵求逆并非总是可取的方法，因为这可能引起数值不稳定。简单的例子有，一段生成不可逆矩阵的代码，并计算随机矩阵与自身逆的乘积与单位矩阵的Froebenius距离。如果$M$是一个矩阵，$M^{-1}$是它的逆，那么$M \cdot M^{-1}=I$。我们会看到从数据计算的角度讲，并非一直如此： 
 
 ```{r,eval=F}
 N <- 200
 result <- data.frame(i=numeric(N),fr=numeric(N))
   for(i in 2:N)
-[ 188 ]
-  
-{
 }
 x <- matrix(runif(i*i,1,100),i,i)
 y <- t(x)%*%x
@@ -4066,27 +4063,30 @@ result$fr[i]<- fr
 }
 ```
 
-The code generates square matrices of size going from 2 x 2 to 200 x 200 and computes the Froebenius distance between a perfect identity matrix and the identity matrix obtained by multiplying the random matrix with its inverse. Plotting the result shows that the distance is not zero all the time:
+这个代码生成了一些 方阵，维度从$2 \times 2$到$200 \times  200$，并计算由随机矩阵与自身逆的乘积得到的单位矩阵与完美单位矩阵的Froebenius距离。画出的图形表名，距离并不总是0：
 
 ![](figures/189_1.png)
 
 
-In fact, it increases with the size of the matrix, when more errors accumulate. If we plot the log of the distance, we clearly see the error getting bigger:
+事实上，不稳定性随着矩阵规模的增大而增大。错误也会累积。如果我们画出距离的对数值，我们可以明显的看到误差逐渐变大：
 
 ![](figures/190_1.png)
 
-With a perfect inverse matrix, the distance would be zero all the time and therefore the log would be—in nite. So this simple example tells us that in Bayesian linear regression we can have problems when inverting the matrix X. We therefore need a better algorithm.
-Here we present a simple algorithm to solve the ridge regression problem with a numerically stable solution. The idea is to transform the problem of matrix inversion into a simpler problem to solve, where the matrix to inverse is triangular.
-If X is the matrix containing the data points, and y the vector containing the target, the idea is to  rst extend the matrix and the vector y as follows:
+如果二者都是完美的单位矩阵，距离应该是零，距离对数应该是无穷大。所以这个简单例子告诉我们，在贝叶斯线性回归中，对矩阵$X$求逆可能会有问题。我们需要更好的算法。
+
+这里我们给出一个简单的算法，解决岭回归问题中的数值稳定性问题。其主要思想是把矩阵求逆转换为更简单的问题，其中要求逆的矩阵是三角阵。
+
+如果$X$是包含数据点的矩阵，$y$是包含目标变量的向量，我们首先对矩阵和向量做如下扩展：
 
 $$\hat{X}=( \begin{matrix} X  \\ \sqrt{\Lambda}  \end{matrix} ) 和
 \hat{y}=( \begin{matrix} y/\sigma \\ 0_D  \end{matrix} )
 其中\sqrt{\Lambda}=\frac{1}{\tau}I，\Lambda=\frac{1}{\tau^2}I$$
-The next step is to do a QR decomposition of Xˆ and the last step is to compute the inverse of R, which is easier because it's an upper triangular matrix. Finally, the coef cients of the linear regression are given by:
+
+然后，对$X$做QR分解，最后计算$R$的逆。这个过程要简单些，因为它是上三角矩阵。最终，线性回归的系数如下：
 
 $$\hat{\beta}=R^{-1}Q^T \hat{y}$$
 
-The algorithm in R can be implemented as follows:
+R语言算法的实现如下：
 
 ```{r, eval=F}
 # the numerically stable function
@@ -4103,8 +4103,9 @@ ridge <- function(X,y,lambda)
 }
 ```
 
-This algorithm returns a vector of coef cients, where the  rst value is the intercept. We assume here that the matrix X has a column of one on the left-hand side. We use the qr() function from R to do the QR decomposition.
-The following code runs an example:
+这个算法返回系数向量，其中第一个值是截距。我们假设矩阵$X$的左边第一列都是1.我们使用`qr()`函数做QR分解。
+
+下列代码运行了一个例子：
 
 ```{r,eval=F}
 set.seed(300)
@@ -4116,11 +4117,15 @@ X <- cbind(rep(1,length(x)), x, x^2, x^3,x^4,x^5,x^6,x^7,x^8)
 y <- X %*% beta + rnorm(N,0,4)
 ```
 
-First of all, we generate random data. The reader will note that for the  rst time we set the random seed manually so that the following results can be exactly reproduced. The reason for that is that we want to illustrate a nice behavior of the ridge regression.
-The code generates random values on the x axis, then we give the true beta coef cients, and  nally we generate the data.
-We also add a random Gaussian noise to the target data y so as to test the capacity of the ridge regression with respect to the standard linear regression solved by an OLS.
-The X matrix has many columns but only four of them (plus the intercept) are used to generate y so we expect the linear regression to give very small coef cients to the unused columns (or even zero coef cients).
-Then we run the following code to generate results and plot them:
+首先，我们生成随机数据。读者可能会注意到我们在开始的时候设置了随机种子，以便后续 结果可以准确重现。这样做原因就在于我们希望展示岭回归的行为。
+
+代码生成了x轴上的随机数字，然后我们给出真正的`beta`系数，最后生成随机数据。
+
+我们也可以给目标数据$y$添加高斯噪声，来测试岭回归相对于标准的OLS线性回归的能力。
+
+矩阵$X$有许多列，但是只有其中的4列（以及截距） 用来生成$y$，所以我们希望线性回归可以给那些未用到的列很小的系数（甚至零系数）。
+
+然后我们运行下列代码，生成结果并画出图形：
 
 ```{r,eval=F}
 # plot the results
@@ -4136,43 +4141,43 @@ olsy <- Xt %*% olsbeta$coefficients
 lines(t, olsy,col=3,lwd=2)
 ```
 
-First of all, we generate a sequence of points on the x axis, then we compute the X matrix and then the real function called yt. This is our theoretical model without noise.
-[ 192 ]
-   
-Chapter 6
-The next step is to compute the ridge regression coef cients with our new ridge function as de ned previously. Finally, we compute a standard OLS solution to the same problem. And we plot the results:
+首先我们生成x轴上的随机数序列，然后计算矩阵$X$和真正的函数`yt`。这是没有噪声的理论模型。
+
+接着是使用之前定义的新函数`ridge`计算岭回归系数。。最后，我们算出标准的OLS线性回归方案。我们画出这个结果：
 
 ![](figures/193_1.png)
 
-The  gure shows the real data set as little circles. The dashed black line is the true function, the one we called our theoretical model before. It is the function without the noise. The red line is very close to the true function. This is the ridge regression. Because of the shrinkage effect of the ridge regression, it is less sensitive to the noise and gives a better solution.
-However, the green line is the standard OLS function. It has a wiggly behavior because it is more sensitive to the noise. This is an illustration of the over- tting problem. In this example, the OLS tries too hard to be close to the data and ends up with a solution that is more unstable than the ridge regression.
-[ 193 ]
-    
-Bayesian Modeling – Linear Models
-In order to illustrate the last point a bit more, we run a  nal example in which we exaggerate the noise. Instead of having a standard deviation of 4, we use the value 16, making the data very noisy:
+这个图中的真实数据集用小圆圈表示。黑色虚线是真正的函数，也是之前所谓的理论模型。这是没有噪声额模型。红色曲线非常接近真实函数，这是岭回归。由于岭回归的收缩作用，曲线对 噪声不敏感，因而给出更好的结果。
+
+但是，绿色曲线是标准的OLS函数。由于它对噪音很敏感，因此曲线摆动的幅度较大。这是过拟合图形展示。在这个例子中，OLS试图经过每一个点，而不能靠近真实的数据。最终得到一个没有岭回归稳定的答案。
+
+为了再解释一下最后一点，我们扩大噪声的影响，再次运行模型。我们把标准差从4改为16，增大噪声的影响：
 
 ![](figures/194_1.png)
 
-Obviously, this is an extreme example, but we see again that the ridge regression stays closer to the true function. The OLS solution, on the other hand, became completely unstable and is totally over- tting.
+很明显，这是一个极端的例子，我们下再次看到岭回归还是离真正的函数很近。而OLS函数，变得非常不稳定，过拟合很严重。 
 
 ### 更多R语言程序包
 
-Bayesian linear regression is a well-covered topic in R and many packages implement such models. Of course we mentioned glmnet before, which implements ridge regression and Lasso. It also implements a mixture of both, called the elastic net, in which two penalty functions are used at the same time.
-Another package is bayesm, which covers linear and multivariate linear regression, multinomial logit and probit, mixtures of Gaussians, and even Dirichlet process prior density estimation.
-[ 194 ]
-    
-Chapter 6
-We can also mention the arm package, which provides Bayesian versions of glm() and polr() and implements hierarchical models. It is another very powerful package.
-Of course, we shouldn't stop here and ought to extend our study of Bayesian models to all sorts of algorithms and prior distributions. At some point, it becomes impossible to  nd an analytical solution and one should use Monte-Carlo inference, as we saw in the previous chapter.
+贝叶斯线性回归是R中深入讨论的话题。许多程序包都可以实现这个模型。当然，我们之前提到了`glmnet`，它实现了岭回归和Lasso回归，也可以同时实现两者的混合模型，叫做弹性网络（elastic net）。弹性网络可以同时使用二者的惩罚。
+
+另一个程序包是`bayesm`，它包括线性回归和多变元回归，多项式logit和probit，高斯混合模型，和狄利克雷过程先验密度估计。 
+
+我们也推荐`arm`程序包，它提供了`glm()`和`polr()`的贝叶斯版本，实现了层次模型。它是另一个强大的程序包。
+
+当然，我们不应该止步于此，应该继续研究贝叶斯模型对各种算法和检验 分布的解释。从某种意义上讲，找出一个解析答案已经变得不太可能，我们应该使用蒙特卡洛推断，就像之前的章节解释的那样。
 
 ## 小结
 
-In this chapter, we saw the standard linear model. This model is one of the most important models in statistics and provides a simple, additive way to represent relationships between observed variables and a target.
-Estimating good parameters for a linear model can be hard sometimes and one should be very careful not to trust the results immediately. However, a Bayesian approach to the problem helps to include prior knowledge into the model and drive it toward a more stable and usable solution.
-We saw ridge regression and Bayesian linear regression. We saw that, when the parameters have a Gaussian prior, then these two approaches are equivalent and very easy to compute.
-Using a simple example, we saw that a standard regression can lead to completely over- tted results and that the Bayesian approach solved the problem.
-In the next chapter, we will look at more advanced models for dealing with clusters of data, called mixture models. These models make the assumption that the data is generated by a different group and the goal will be to automatically discover the group and reveal the hidden process behind it.
- [ 195 ]
+在本章中，我们看到了标准的线性模型。这个模型是统计学中最重要的模型之一。它给出了简单的，叠加的方法来表示观测变量和目标变量之间的关系。
+
+线性模型的参数估计有时会很困难，我们不应该立马相信算出的结果。但是，贝叶斯方法可以帮助我们把先验知识考虑进模型中，并生成一个更加稳定和可用的模型。
+
+我们看到了岭回归和贝叶斯回归。当参数具有高斯先验分布时，这两个方法是等价的，而且都很容易计算。
+
+通过简单的例子，我们看到标准的线性回归可能导致严重的过拟合，而贝叶斯方法可以解决这个问题。
+
+在下一章中，我们会研究更加先进的模型，即混合模型，来处理数据簇。这些模型假定数据是由不同的组生成的。其目的是自动发现每个组，并揭示背后的过程。
   
 ------
 
@@ -4198,7 +4203,9 @@ The mixture model is a model of a larger distribution family called latent varia
 When the data naturally exhibits clusters, it seems reasonable to say that each cluster is a small model.
 The whole problem is then to  nd to what extent a submodel will participate in the data generation process and what the parameters for each sub model are. This is usually solved using the EM algorithm.
 There are many ways to combine small models in order to make a bigger or more generic model. The approach generally used in mixture modeling is to give a proportion to each sub model, such that the sum of proportions is one. In other words, we build an additive model as follows:
-p(xi |θ)=∑K πk pk (xi |θ) i=1
+
+$$p(x_i |\theta)=\sum^K_{i=1} \pi_k p_k (x_i |\theta)$$
+
 In this, πk is the proportion of each sub model. And each sub model is captured by the probability distribution pk.
 Of course, in this form, the sum of πk is 1. Also, the proportions can be considered as random variables and the model can be extended in a Bayesian way. The model is therefore called a mixture model and the probability distribution pk is called the base distribution.
 [ 198 ]
@@ -4224,9 +4231,13 @@ Sampling from such a model could give the following data set, for example:
     
 Probabilistic Mixture Models
 The base density is:
- p(x |θ,z =k)=N(x |μ ,σ2) iiikk
+
+$$p(x_i |\theta,z_i =k)=N(x_i |\mu_k ,\sigma^2_k)$$
+
 And the latent variable distribution is a categorical distribution Π = (π1,...,πK ). The model is therefore:
-p(xi |θ)=∑K N(x |μ ,σ2) i=1 ikk
+
+$$p(x_i |\theta)=\sum^K_{i=1} N(x_i |\mu_k ,\sigma^2_k)$$
+
 In the case of a multidimensional Gaussian, the variance σ2k will be replaced by the covariance matrix Σk.
 
 ## 混合模型的期望最大化
@@ -4243,15 +4254,24 @@ The EM algorithm is a good choice for learning a mixture model. Indeed, in Chapt
 ![](figures/201_2.png)
 
 As in many probabilistic models,  tting the parameters can be solved by  nding the set of parameters that maximizes the probability to generate the data. In other words, we aim at maximizing the log-likelihood of the model:
-L(θ)=∏N p(xi |θ)=∑N log(∑K p(xi,zi |θ)) i=1 i=1 zi
+
+$$L(\theta)=\prod^N_{i=1} p(x_i |\theta)=\sum^N_{i=1}log(\sum^K_{z_i} p(x_i,z_i |\theta))$$
+
 And that's where the problem is because the sum inside the log is hard to reduce and in many cases it is intractable. You will also note that this likelihood is written in terms of the observed data. So, if we follow the previous graphical model, we can write the complete log-likelihood by introducing the latent variables as follows:
-Lc(θ)=∑N logp(xi,zi|θ) i=1
+
+$$L_c(\theta)=\sum^N_{i=1}logp(x_i,z_i |\theta)$$
+
 The EM algorithm will solve the problem of computing this likelihood, in which z is completely hidden, by performing the following two steps.
-First of all, we de ne the expected complete data log likelihood by: Q(θt,θt−1)=E(Lc (θ)|Dataθt−1)
+First of all, we de ne the expected complete data log likelihood by: 
+
+$$Q(\theta_t,\theta_{t−1})=E(L_c (\theta)|Data\theta_{t−1})$$
+
 This expectation is the expected complete data log likelihood computed from the parameters found in the previous step. Of course, at the beginning of the algorithm, the parameters are initialized to some arbitrary value. We saw in Chapter 3, Learning Parameters that this value can be anything, but choosing values at random can lead to a very long convergence time. Nevertheless, it has been proved that the EM algorithm converges for any value.
 The E-step in the EM algorithm will compute this expected value—that is, the expected parameters given the data and the previous parameters.
 Then the M-step will maximize this expectation given the newly found set of parameters θ that will solve the problem:
-θt =argmaxθQ(θt,θt−1)
+
+$$\theta_t =argmax_\theta Q(\theta_t,\theta_{t−1})$$
+
 [ 202 ]
    
 Chapter 7
@@ -4259,8 +4279,8 @@ In the mixtools package, it is possible to  t a mixture of Gaussian using the fu
 First, we generate a simple data set of two univariate Gaussian:
 
 ```{r,eval=F}
-x1 ← rnorm(1000,-3,2)
-x2 ← rnorm(850,3,1)
+x1 <- rnorm(1000,-3,2)
+x2 <- rnorm(850,3,1)
 ```
 
 Then, we plot the result to see how they are empirically distributed using the hist function:
@@ -4275,7 +4295,7 @@ And we obtain the following  gure, where we can easily identify the two clusters
 
 
 ```{r,eval=F}
-model ← normalmixEM( c(x1,x2) , lambda=.5, k=2)
+model <- normalmixEM( c(x1,x2) , lambda=.5, k=2)
 ```
 
 [ 203 ]
@@ -4337,58 +4357,62 @@ The mixture of Bernoulli is another interesting problem. As we saw earlier, the 
 For example, the following (very stylized)  gure represents the letter A:
 In a real application, we would use more pixels. But the idea of the application is to associate the value of pixels to each value of the latent variable, each one representing a different letter. This is a simple model for character recognition.
 The distribution of a Bernoulli variable is:
-1−x p(x|θ)=θx (1−θ)
+
+$$p(x|\theta)=\theta^x (1−\theta)^{1-x}$$
 Now, let's say we have D Bernoulli variables. Each Bernoulli variable is parameterized by one parameter θi. So the likelihood of such a model can be written as:
- i=1 Here, X =(x1, ..., xD) and θ = (θ1, ..., θD).
-ii
-∏D (1−x ) p(X|θ)= θxi (1−θ) i
+
+$$p(X|\theta)= \prod^D_{i=1}\theta_i^{x_i} (1−\theta_i)^{1-x_i}$$
+
+ 这里，$$X =(x_1, ..., x_D)，\theta= (\theta_1, ..., \theta_D)$$.
+ 
 [ 207 ]
 Chapter 7
    
 Probabilistic Mixture Models
 If we introduce the mixture of all the variables then the joint distribution can be written as:
-p(X|θπ)=∑K πKp(x|θk) i=1
+
+$$p(X|\theta \pi)=\sum^K_{i=1} \pi_K p(x|\theta_k)$$
+
 Here, π = (π1, ...πD) are the mixing parameters and the distribution p is inside as:
+
+$$p(x|\theta_k)=\prod^D_{i=1} \theta^{x_i}_{k,i}(1-\theta_{k,i})^{1-x_i}$$
+
 In order to  t this model, we need now to  nd the log-likelihood and, as expected, its expression will not be suitable for a direct optimization. The reason is, as usual, that we introduce latent variables for which we have no observations and we therefore need to use an EM algorithm.
 The log-likelihood is taken from the main joint distribution:
-logp(x|θπ)=∑N log(∑Kπkp(xi|θi)) n=1 i=1
+
+$$logp(x|\theta \pi)=\sum^N_{n=1}log(\sum^K_{i=1}\pi_kp(x_i|\theta_i))$$
+
 This is a pretty standard way of computing the log-likelihood. And, as is usually the case for mixture models, the sum inside the log cannot be pushed out. So we end up with a quite complex expression to minimize.
 Now we introduce the latent variable z into the model. It has a categorical distribution with K parameters, such that:
-p(z|π)=∏K πkzk k=1
-And the joint distribution with x is as follows: p(x|zθ)=∏K p(x|θk )zk
+
+$$p(z|\pi)=\prod^K_{k=1}\pi_k^{z_k}$$
+
+And the joint distribution with x is as follows: 
+
+$$p(x|z\theta)=\prod^K_{k=1} p(x|\theta_k )^{z_k}$$
 [ 208 ]
- ∏D
-This is in fact the same distribution as before but for a case k only.
-p(x|θk )=
-θxi i=1 k,i
-k,i
-k=1
-( )1−x 1−θ i
-  
-Chapter 7
+
 As before with the Gaussian mixture, we will write the complete data log-likelihood. This likelihood is what we would optimize if the data set were complete—that is, without latent variables:
- logp(X,Z|θπ)=∑N ∑K n=1 k=1
-zn,k (logπk
-+ ⎡xlogθ+1−xlog1−θ⎤ ∑D ( )( ))
-n,i k,i n,i k,i i=1⎣ ⎦
+
+$$logp(X,Z|\theta \pi)=\sum^N_{n=1} \sum^K_{k=1} z_{n,k}(log \pi_k +\sum^D_{i=1} [x_{n,i}logθ_{k,i}+(1−x_{n,i})log(1−\theta_{k,i})])$$
+
 In this (very long) expression, we consider X and Z to be matrices, so in fact we use the design matrix notation, where each row vector of X (resp. Z) is one set of observations of each variable xi (resp. z).
 Using the Bayes formula, we can calculate the expectation of the complete-data log-likelihood with respect to the distribution of the latent variable. This step is necessary for the E-step of the EM algorithm, where we want to complete the data set:
-Ez(logp(X,Z|θπ))=∑N ∑K E(zn,k)(logπk n=1 k=1
+
+$$E_z(logp(X,Z|\theta \pi))=\sum^N_{n=1} \sum^K_{k=1} E(z_{n,k})(log \pi_k +\sum^D_{i=1} [x_{n,i}logθ_{k,i}+(1−x_{n,i})log(1−\theta_{k,i})])$$
+
 And the expected value of the latent variable is:
-+ ⎡x logθ +1−x log1−θ ⎤ ∑D ( )( ))
-n,i k,i n,i k,i i=1⎣ ⎦
-π p(x |θ ) E(z)=∑k i k
-n,k K π p(x |θ )
- j=1
+
+$$E(z_{n,k})=\frac{\pi_kp(x_i|\theta_k)}{\sum^K_{j=1}\pi_j p(x_n|\theta_j)}$$
+
 In a sense, this is not surprising because in the end we need to compute the ratio of zi
 for each subset of the dataset in which it appears after the posterior computations. Finally, in the M-step, we can derive the complete-data log-likelihood with respect to
-the parameters θk and π and set it equal to zero. We obtain the following estimators: θk=1∑N E(zn,k)xn
-Nk n=1 πk =Nk
-jnj
-  [ 209 ]
-N
- 
-Probabilistic Mixture Models
+the parameters θk and π and set it equal to zero. We obtain the following estimators: 
+
+$$\theta_k=\frac{1}{N_k} \sum^N_{n=1} E(z_{n,k})x_n$$
+
+$$\pi_k=\frac{N_k}{N}$$
+
 Here, Nk =∑N E(zn,k ). n=1
 The EM algorithm will alternate between computing the expectation of z and the new values for the parameters θ and π until convergence.
 
@@ -4432,10 +4456,10 @@ The idea of mixture of experts is to have several sub models within a bigger mod
 ![](figures/212_1.png)
 
 In this graph, the red and green lines seems to better represent the data set. However, the model needs to choose when to choose each one. Again, a mixture model could be a solution, except that, in this case, we want the mixture to be dependent on the data points. So the graphical model will be a bit different:
-p(y |x,z,θ)=N(y |wTx,σ2) iii ikik
+
+$$p(y_i |x_i,z_i,\theta)=N(y_i|w^T_k x_i,\sigma_k^2)$$
 This is the linear model as we know it. Next we introduce the dependence of the latent variable to the data points with:
-p(zi |xiθ)=Mult zi |S VTxi
-( ( ))
+$$p(z_i |x_i \theta)=Mult (z_i |S (V^T x_i))$$
 [ 212 ]
     
 Chapter 7
@@ -4445,8 +4469,9 @@ The graphical model associated with such a model is quite different now because 
 ![](figures/213_1.png)
 
 In general, mixture of experts models uses a softmax gating function such that:
-f (x)= exp(βT x) ∑k exp(βT x)
-   n=1
+
+
+$$f (x)=\frac{exp(\beta^T x)}{\sum^k_{n=1} exp(\beta^T x)}$$
 [ 213 ]
  
 Probabilistic Mixture Models
@@ -4512,21 +4537,20 @@ So, if we follow this graphical model carefully, we have a process that generate
 
 In this model, only the words are observable. All the other variables will have to be determined without observation, exactly like in the other mixture models. So documents are represented as random mixtures over latent topics, in which each topic is represented as a distribution over words.
 The distribution of a topic mixture based on this graphical model can be written as:
-p(θ,z,w|αβ)=p(θ|α)∏N p(zi |θ)p(wi |zi,β) i=1
+
+$$p(\theta,z,w|\alpha\beta)=p(\theta|\alpha)\prod^N_{i=1} p(z_i |\theta)p(w_i |z_i,\beta)$$
 You see in this formula that for each word we select a topic, hence the product from 1 to N.
 Integrating over θ, and summing over z, the marginal distribution of a document is as follows:
-p(w|αβ)=∫p(θ|α)(∏N ∑ p(zi |θ)p(wi |ziβ))dθ i=1 zi
+
+$$p(w|\alpha\beta)=\int p(\theta|\alpha)(\prod^N_{i=1}\sum_{z_i}p(z_i |\theta)p(w_i|z_i\beta))d\theta$$
+
 The  nal distribution can be obtained by taking the product of marginal distributions of single documents, so as to get the distribution over a collection of documents (assuming documents are independently and identically distributed). Here, D is the collection of documents:
- p(D|αβ)=∏M ∫p(θ |α)(∏Nd ∑ p(z |θ )p(w |z β))dθ
+
+$$p(D|\alpha\beta)=\prod^M_{d=1} \int p(\theta_d |\alpha)(\prod^{N_d}_{i=1} \sum_{z_{d,i}}p(z_{d,i} |\theta_d )p(w_{d,i}|z_{d,i}\beta))d\theta_d$$
 d
-and z given a document. By applying the Bayes formula we know that: p(θ,z|wαβ)= p(θ,z,w|α,β)
-p(w|αβ) [ 219 ]
-d,i d d,i d,i
-The main problem to solve now is how to compute the posterior distribution over θ
-d=1
-i=1 z
-d,i
-d
+The main problem to solve now is how to compute the posterior distribution over θand z given a document. By applying the Bayes formula we know that: 
+
+$$p(\theta,z|w\alpha \beta)= \frac{p(\theta,z,w|\alpha,\beta)}{p(w|\alpha,\beta)}$$
   
 Probabilistic Mixture Models
 Unfortunately, this is intractable because of the normalization factor at the denominator. The original paper on LDA therefore refers to a technique called variational inference, which aims at transforming a complex Bayesian inference problem into a simpler approximation which can be solved as a (convex) optimization problem. This technique is the third approach to Bayesian inference and has been used on many other problems. In the next section, we brie y review the principles of variational inference and,  nally, we will show an example in R to conclude this section.
@@ -4538,14 +4562,17 @@ The main idea in variational inference is to consider a family of lower bounds i
 In general, a good approximation for a graphical model consists in simplifying the graph of the model by decoupling variables. In practice, we remove edges.
 In the LDA model, the proposed variational problem is done by decoupling the variables θ and β.
 The resulting graphical model after decoupling no longer shows the connection between θ and zi but includes new free variational parameters. The  nal distribution is given by:
-q(θz|γφ)=q(θ|γ)∏N q(zi |φi) i=1
+
+$$q(\theta z|\gamma \psi)=q(\theta|\gamma) \prod^N_{i=1}q(z_i |\psi_i)$$
+
 Here, γ is a Dirichlet variable and Φ a multinomial.
 The optimization problem requires a way to calculate some distance or discrepancy
 between the simpli ed distribution and the real distribution.
 This is usually done by using the Kullback-Leibler divergence between the two
-distributions. The optimization problem is now to  nd (γ, φ) such that: (γ∗,φ∗)=argmin D(q(θ,z|γ,φ)  p(θ,z|w,α,β))
+distributions. The optimization problem is now to  nd (γ, φ) such that: 
+
+$$(\gamma^\ast，\phi^\ast)=argmin_{\gamma,\psi} D(q(\theta,z|\gamma,\psi) \parallel p(\theta,z|w,\alpha,\beta))$$
 [ 220 ]
- (γ,φ)
   
 The  tting of the parameters of the model can be done again using the EM algorithm. However, as in inference, the E-step is intractable but can be solved with the variational approximation of this problem.
 The E-step consists in  nding the values for the variational parameters for each document. Then the M-step consists in maximizing the lower bound of the log-likelihood with respect to the parameters α and β. The steps are repeated until convergence of the lower bound on the log-likelihood.
