@@ -4274,29 +4274,28 @@ $$Q(\theta_t,\theta_{t−1})=E(L_c (\theta)|Data\theta_{t−1})$$
 
 这个期望是根据上一步中的参数计算得出的完整数据对数似然率期望值。当然，在算法开始的时候，参数可以初始化成任意数值。我们在第三章*参数学习*中看到，这个值可以是任意值，但是随机选取数值可能导致非常长的收敛时间。不过，已经证明，不论初始值如何，期望最大化算法都可以收敛。 
 
-期望最大化算法中的EThe E-step in the EM algorithm will compute this expected value—that is, the expected parameters given the data and the previous parameters.
-Then the M-step will maximize this expectation given the newly found set of parameters θ that will solve the problem:
+期望最大化算法中的E步骤会计算期望值，即给定数据和之前参数的期望参数值
+
+M步骤会根据新给定的参数集$\theta$最大化期望，求解问题：
 
 $$\theta_t =argmax_\theta Q(\theta_t,\theta_{t−1})$$
 
-[ 202 ]
-   
-Chapter 7
-In the mixtools package, it is possible to  t a mixture of Gaussian using the function normalmixEM. Here is how to do so.
-First, we generate a simple data set of two univariate Gaussian:
+在程序包`mixtools`中，我们可以使用函`normalmixEM`拟合高斯混合模型。过程如下。
+
+首先，我们生成两个单变元高斯数据集：
 
 ```{r,eval=F}
 x1 <- rnorm(1000,-3,2)
 x2 <- rnorm(850,3,1)
 ```
 
-Then, we plot the result to see how they are empirically distributed using the hist function:
+然后，我们使用函数`hist`画出结果，看看它们是如何经验的分布的:
 
 ```{r,eval=F}
 hist(c(x1,x2), breaks=100, col='red')
 ```
 
-And we obtain the following  gure, where we can easily identify the two clusters of data and see they are approximately distributed. Given that we use random generators, your result might be slightly different from what is shown in this book:
+我们可以得到下面的图形，其中可以轻松看到两个数据簇，以及二者近似分布。由于使用随机生成函数，读者的结果可能和本书看到的些许不同：
 
 ![](figures/203_1.png)
 
@@ -4305,18 +4304,14 @@ And we obtain the following  gure, where we can easily identify the two clusters
 model <- normalmixEM( c(x1,x2) , lambda=.5, k=2)
 ```
 
-[ 203 ]
-    
-Probabilistic Mixture Models
-This model should take between 30 to 40 iterations to run. We give an initial proportion of 50% to each class and set the number of clusters to 2.
-In our results, we obtain the following parameters:
+这个模型应该迭代30到40测。我们给每一类的比例设为50%，一共有2个类。
 
-* The mixing proportions are 54.9% and 45.1%. This precisely corresponds to
-the proportion we gave to our data sets x1 and x2.
-* The μ parameters are -2.85 and 3.01, which are extremely close to the initial
-values we gave too.
+在我们的结果中，我们得到了下列参数：
 
-We can plot this histogram again with the Gaussian distributions superimposed on it:
+* 混合比例是54.9%和45.1%。这与我们初始给出的`x1`和`x2`数据集比例相吻合。
+* $\mu$参数是-2.85和3.01，也与我们给出的初始值很接近。
+
+我们可以画出柱状图，并叠加上高斯分布曲线：
 
 ```{r,eval=F}
 hist(c(x1,x2),breaks=100,col='red',freq=F,ylim=c(0,0.4))
@@ -4326,19 +4321,16 @@ lines(x,dnorm(x,model$mu[2],model$sigma[2]), col='green')
 
 ![](figures/204_1.png)
 
-The result is obviously far off what we expected in terms of proportion. If we redraw it by adding the proportions now, we obtain the expected mixture distribution:
+结果明显偏离期望的比例。如果我们添加比例，重新做图，我们会得到期望的分布：
 
 ```{r,eval=F}
 hist(c(x1,x2),breaks=100,col='red',freq=F)
-lines(x,
-  model$lambda[1]*dnorm(x,model$mu[1],model$sigma[1]) + model$lambda[2]*d
-norm(x,model$mu[2],model$sigma[2]) ,
-lwd=3)
+lines(x,model$lambda[1]*dnorm(x,model$mu[1],model$sigma[1]) + model$lambda[2]*dnorm(x,model$mu[2],model$sigma[2]), lwd=3)
 ```
 
 ![](figures/205_1.png)
 
-The number of clusters is very important and can change the results dramatically when not chosen properly. For example, if we try the following values, we end up with different results:
+簇的数量非常重要，选取不合适的话会剧烈改变结果。例如，如果我们使用下面的值，我们会得到不同的结果：
 
 ```{r,eval=F}
 model <- normalmixEM(c(x1,x2), lambda=.5, k=3)
@@ -4348,12 +4340,11 @@ WARNING! NOT CONVERGENT!
   number of iterations= 1000
 ```
 
-With three clusters, the EM algorithm still converges. With four clusters, we need
-to increase the number of iterations for the algorithm to converge. In fact, even with three clusters, the result is interesting if not surprising. Plotting the density function, we obtain:
+当存在3个簇时，期望最大化算法依然会收敛。当有4个簇时，我们就需要增加迭代的次数。事实上，即使有3个簇，结果也不错，绘出密度函数，我们有：
 
 ![](figures/206_1.png)
 
-In this plot, we see that the second cluster is somehow attached to the  rst one. If you carefully look at the thick black line in the middle, you will see that the left-hand side distribution is not totally Gaussian. Inspecting the model parameters, we see that the means of the Gaussian are -3.74, -1.08, and 2.9. The middle one is indeed closer to
+在这个图中，我看到第二个簇和第一个簇靠的很近。如果我们仔细看一下中间的黑色粗线，会看到左边的分布不完全是高斯的。检查一下模型参数，我们看到高斯分布的平均值是-3.74，-1.08和2.9。The middle one is indeed closer to
 the  rst cluster. The proportion is interesting: 38%, 15.4%, and 46.5%. So it seems the EM algorithm split the biggest cluster (1,000 points against 850) into 2 Gaussian to respect our choice of three clusters.
 A slow convergence can sometimes be an indication that our hyperparameters are not totally adequate and more values should be explored.
 [ 206 ]
