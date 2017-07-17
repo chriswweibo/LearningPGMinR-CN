@@ -4191,7 +4191,7 @@ lines(t, olsy,col=3,lwd=2)
 
 我们会放松混合模型的一个假设，看到第二个模型，即专家混合。它会选择一个依赖数据点的聚类。它可以当做是概率决策树的第一个方法。
 
-最后我们会看到非常强大的模型，即**隐狄利克雷分布**（Latent Dirichlet Allocation，LDA）,。在这个模型中，我们放松了混合模型的另外一个假设。在混合模型中，一个数据点应该由一个簇生成。在LDA中，它可以同时属于多个簇。这个模型成功的用在了文本分析等工作中。它属于混合成员模型族中的一个。
+最后我们会看到非常强大的模型，即**隐狄利克雷分布**（Latent Dirichlet Allocation，LDA）。在这个模型中，我们放松了混合模型的另外一个假设。在混合模型中，一个数据点应该由一个簇生成。在LDA中，它可以同时属于多个簇。这个模型成功的用在了文本分析等工作中。它属于混合成员模型族中的一个。
 
 我们会在本章中介绍下列内容：
 
@@ -4205,73 +4205,76 @@ lines(t, olsy,col=3,lwd=2)
 
 当数据天然的存在簇时，每一个簇都可以看做是一个小模型。
 
-The whole problem is then to  nd to what extent a submodel will participate in the data generation process and what the parameters for each sub model are. This is usually solved using the EM algorithm.
-There are many ways to combine small models in order to make a bigger or more generic model. The approach generally used in mixture modeling is to give a proportion to each sub model, such that the sum of proportions is one. In other words, we build an additive model as follows:
+整个问题就变成了，找出子模型参与数据生成过程的程度，以及每个子模型的参数是什么。这个问题通常用期望最大化解决。
+
+有许多方法可以合并小模型，以便生成更大的或更原生的模型。用在混合模型中的这个方法通常要给出每个子模型的比例，满足比例和为1。换句话说，我们要构建一个如下的增量模型：
 
 $$p(x_i |\theta)=\sum^K_{i=1} \pi_k p_k (x_i |\theta)$$
 
-In this, πk is the proportion of each sub model. And each sub model is captured by the probability distribution pk.
-Of course, in this form, the sum of πk is 1. Also, the proportions can be considered as random variables and the model can be extended in a Bayesian way. The model is therefore called a mixture model and the probability distribution pk is called the base distribution.
-[ 198 ]
-   
-Chapter 7
-There are, theoretically, no constraints on the form of the base distribution and, depending of the function, several types of model arise. In Machine Learning: A Probabilistic Perspective, the following taxonomy helps us to understand many popular models:
+其中，$\pi_k$是每个子模型的比例。每个子模型都通过概率分布$p_k$刻画。
+
+当然，$\pi_k$的和是1。而且，比例可以看成是一个随机变量，而且可以通过贝叶斯的形式扩展。因此这个模型叫做混合模型，概率分布$p_k$叫做基础分布。
+
+理论上讲，基础分布的形式不存在任何约束，而且根据函数的不同，有几种类型的模型。在《机器学习：一种概率视点》（*Machine Learning: A Probabilistic Perspective*)中，下列分类可以帮助我们理解许多常见的模型：
 
 
-Name | Base distribution | Latent var. distribution | Notes
+名称 | 基础分部 | 隐变量分布 | 备注
 --------|--------|--------|--------
- Mixture of Gaussian | Gaussian | Discrete | A Gaussian is chosen among K
-Probabilistic PCA | Gaussian | Gaussian | .
-Probabilistic ICA | Gaussian | Laplace |Used for sparse coding
-Latent Dirichlet Allocation | Discrete| Dirichlet |Used for text analysis
+ 高斯混合模型 | 高斯分布 | 离散分布 | 从K中选取高斯模型
+概率PCA | 高斯分布 | 高斯分布 | .
+概率ICA | 高斯分布 | 拉普拉斯分布 | 用于稀疏编码
+隐狄利克雷分布 | 离散分布| 狄利克雷分布 |用于文本分析
 
-These are just a few examples to show that many models are possible based on the same principle. However, it does not mean they are all easy to solve and, in many cases, advanced algorithms will be necessary.
-For example, the mixture of Gaussian model is de ned as follows: we consider that each sub model is a Gaussian distribution (base distribution) and the latent variable distribution is discrete. For each distribution, we have a mean and a variance.
-Sampling from such a model could give the following data set, for example:
+这只是几个例子，说明许多模型都基于相同的思想。但是这并不意味着它们都很容易求解。在许多情况下，我们还需要高级的算法。
+
+例如，高斯混合模型有如下定义：我们把每一个子模型当做一个高斯分布（基础分布），隐变量分布是离散的。对于每一个分布我们都有平均值和方差。
+
+从这样的模型中采样可能会生成下列数据集，例如：
 
 ![](figures/199_1.png)
 
 
-    
-Probabilistic Mixture Models
-The base density is:
+基础密度函数是：
 
 $$p(x_i |\theta,z_i =k)=N(x_i |\mu_k ,\sigma^2_k)$$
 
-And the latent variable distribution is a categorical distribution Π = (π1,...,πK ). The model is therefore:
+隐变量分布是类别型分布$\prod=(π_1,...,π_K)$。因此模型就是：
 
 $$p(x_i |\theta)=\sum^K_{i=1} N(x_i |\mu_k ,\sigma^2_k)$$
 
-In the case of a multidimensional Gaussian, the variance σ2k will be replaced by the covariance matrix Σk.
+在高维高斯分布中，方差$\sigma^2_k$会替换成协方差矩阵$\sum^k$。
 
 ## 混合模型的期望最大化
 
-The standard way for  tting mixture models is the EM algorithm or Expectation Maximization. This algorithm was the focus of Chapter 3, Learning Parameters. So here, we just recall the basic principles of this algorithm again, to later show a Bernoulli mixture model.
-A good package to use in R is mixtools to learn mixture models. A thorough presentation of this package is given in the Journal of Statistical Software, Oct 2009, Vol 32, Issue 6, mixtools: An R Package for Analyzing Finite Mixture Models.
-The EM algorithm is a good choice for learning a mixture model. Indeed, in Chapter 3, Learning Parameters, we saw that when data is missing or even when variables are hidden (that is, all their respective data is missing), the EM algorithm will proceeds in two steps:  rst compute the expected value of the missing variables, so that to do as if the data is fully observed, and then maximize an objective function, usually the likelihood. Then, given the new set of parameters, the process is iterated again until some convergence criterion is reached.
-[ 200 ]
+拟合混合模型的标准算法是期望最大化算法或期望最大化。这个算法已经在第三章*参数学习*中重点介绍。所以，我们只回顾一下算法的基本思想。，然后展示伯努利混合模型。
+
+R中有一个不错的程序包叫做`mixtools`可以用来学习混合模型。这个程序包的完整介绍在《Journal of Statistical Software》（Oct 2009, Vol 32, Issue 6）的《*mixtools: An R Package for Analyzing Finite Mixture Models*》中。
+
+期望最大化算法是学习混合模型的优秀方案。事实上，在第三章*参数学习*中，我们看到在数据缺失或变量隐藏（即所有相关数据缺失）的情况下，期望最大化算法会执行两步流程。首先，算法计算缺失变量的期望值，以便保证所有数据似乎都安全可观测。然后算法会最大化目标函数，通常是似然函数。然后，给定新的参数集合，流程会再次迭代，直到满足特定的收敛条件。
   
 ![](figures/201_1.png)
 
-  In the mixture model represented by the preceding graphical model, it is clear that the variable z is the latent variable and the xi is observed. We usually adopt plate notation to give a comprehensive view of the data generation process as a graphical model and use the following graph:
+在上图表示的混合模型中，可以清楚的看到变量$z$是隐变量，而$x_i$是可观测的。我们通常在图模型中采用平板表示法，给出数据生成过程的综合展示，如下列图形： 
   
 ![](figures/201_2.png)
 
-As in many probabilistic models,  tting the parameters can be solved by  nding the set of parameters that maximizes the probability to generate the data. In other words, we aim at maximizing the log-likelihood of the model:
+在许多概率模型中，拟合参数可以通过找出参数集合的方式求解。这些参数可以最大化生成数据的概率。或者说，我们关注于最大化模型的对数似然率：
 
 $$L(\theta)=\prod^N_{i=1} p(x_i |\theta)=\sum^N_{i=1}log(\sum^K_{z_i} p(x_i,z_i |\theta))$$
 
-And that's where the problem is because the sum inside the log is hard to reduce and in many cases it is intractable. You will also note that this likelihood is written in terms of the observed data. So, if we follow the previous graphical model, we can write the complete log-likelihood by introducing the latent variables as follows:
+这个等式有一个问题，就是log内的求和很难计算，而且在很多情况下无从下手。读者可能记得这个似然率是使用可观测数据的形式写出的。因此，如果我们使用之前的图模型，我们可以引入隐变量，写出完整的对数似然率，如下：
 
 $$L_c(\theta)=\sum^N_{i=1}logp(x_i,z_i |\theta)$$
 
-The EM algorithm will solve the problem of computing this likelihood, in which z is completely hidden, by performing the following two steps.
-First of all, we de ne the expected complete data log likelihood by: 
+期望最大化会求解计算似然率，其中$z$是完全隐藏的。步骤如下：
+
+首先，我们定义**完整数据对数似然率期望值**（expected complete data log likelihood）:
 
 $$Q(\theta_t,\theta_{t−1})=E(L_c (\theta)|Data\theta_{t−1})$$
 
-This expectation is the expected complete data log likelihood computed from the parameters found in the previous step. Of course, at the beginning of the algorithm, the parameters are initialized to some arbitrary value. We saw in Chapter 3, Learning Parameters that this value can be anything, but choosing values at random can lead to a very long convergence time. Nevertheless, it has been proved that the EM algorithm converges for any value.
-The E-step in the EM algorithm will compute this expected value—that is, the expected parameters given the data and the previous parameters.
+这个期望是根据上一步中的参数计算得出的完整数据对数似然率期望值。当然，在算法开始的时候，参数可以初始化成任意数值。我们在第三章*参数学习*中看到，这个值可以是任意值，但是随机选取数值可能导致非常长的收敛时间。不过，已经证明，不论初始值如何，期望最大化算法都可以收敛。 
+
+期望最大化算法中的EThe E-step in the EM algorithm will compute this expected value—that is, the expected parameters given the data and the previous parameters.
 Then the M-step will maximize this expectation given the newly found set of parameters θ that will solve the problem:
 
 $$\theta_t =argmax_\theta Q(\theta_t,\theta_{t−1})$$
