@@ -4304,7 +4304,7 @@ hist(c(x1,x2), breaks=100, col='red')
 model <- normalmixEM( c(x1,x2) , lambda=.5, k=2)
 ```
 
-这个模型应该迭代30到40测。我们给每一类的比例设为50%，一共有2个类。
+这个模型应该迭代30到40次。我们给每一类的比例设为50%，一共有2个类。
 
 在我们的结果中，我们得到了下列参数：
 
@@ -4344,95 +4344,105 @@ WARNING! NOT CONVERGENT!
 
 ![](figures/206_1.png)
 
-在这个图中，我看到第二个簇和第一个簇靠的很近。如果我们仔细看一下中间的黑色粗线，会看到左边的分布不完全是高斯的。检查一下模型参数，我们看到高斯分布的平均值是-3.74，-1.08和2.9。The middle one is indeed closer to
-the  rst cluster. The proportion is interesting: 38%, 15.4%, and 46.5%. So it seems the EM algorithm split the biggest cluster (1,000 points against 850) into 2 Gaussian to respect our choice of three clusters.
-A slow convergence can sometimes be an indication that our hyperparameters are not totally adequate and more values should be explored.
-[ 206 ]
+在这个图中，我看到第二个簇和第一个簇靠的很近。如果我们仔细看一下中间的黑色粗线，会看到左边的分布不完全是高斯的。检查一下模型参数，我们看到高斯分布的平均值是-3.74，-1.08和2.9。中间的分布确实和第一个很靠近，相应的比例是：38%，15.4%和46.5%。因此，期望最大化算法好像是把最大的簇（1000个点中的850个点）分成了两个高斯分布，进而得到3个簇。
+
+收敛速度填满有时可能说明我们的超参数不完全合适，应该研究更多的值。
+
     
 ## 伯努利混合
 
-The mixture of Bernoulli is another interesting problem. As we saw earlier, the graphical model to represent such a model is always the same. Only the probability distribution functions associated to each node change compared to the previous example. The mixture of Bernoulli  nds applications in particular in analyzing black and white images, where an image is made of one Bernoulli variable for each pixel. Then the goal is to classify an image, that is, to say which value of the latent variable produced it, given some observed pixels.
-For example, the following (very stylized)  gure represents the letter A:
-In a real application, we would use more pixels. But the idea of the application is to associate the value of pixels to each value of the latent variable, each one representing a different letter. This is a simple model for character recognition.
-The distribution of a Bernoulli variable is:
+伯努利混合是另一个有趣的问题。正如我们之前看到的，这类模型的图模型表示都是一样的。只有相应的概率分布函数会有不同。伯努利混合在分析黑白图像的应用中很有用。图像是由像素的一个伯努利变量构成的。目的是为了给图像分类，即给定一些观察到的像素，确定隐变量的哪些值生成了图像。
+
+例如，下图表示字母A：
+
+![](figures/207_1.png)
+
+
+在实际应用中，我们会使用更多的像素。但是主要思想是把每个像素的值关联到隐变量的每一个值上，每个隐变量都代表一个字母。这是文字识别的简单模型。
+
+伯努利变量的分布是：
 
 $$p(x|\theta)=\theta^x (1−\theta)^{1-x}$$
-Now, let's say we have D Bernoulli variables. Each Bernoulli variable is parameterized by one parameter θi. So the likelihood of such a model can be written as:
+
+现在，假设我们有D个伯努利变量，每一个伯努利变量都被一个参数$\theta_i$参数化。因此这模型的似然率可以写作：
 
 $$p(X|\theta)= \prod^D_{i=1}\theta_i^{x_i} (1−\theta_i)^{1-x_i}$$
 
  这里，$$X =(x_1, ..., x_D)，\theta= (\theta_1, ..., \theta_D)$$.
  
-[ 207 ]
-Chapter 7
-   
-Probabilistic Mixture Models
-If we introduce the mixture of all the variables then the joint distribution can be written as:
+
+如果，我们引入所有变量的混合，那么联合分布可以写作：
 
 $$p(X|\theta \pi)=\sum^K_{i=1} \pi_K p(x|\theta_k)$$
 
-Here, π = (π1, ...πD) are the mixing parameters and the distribution p is inside as:
+这里，$\pi= (\pi_1, ...\pi_D)$是混合参数，分布$p$是：
 
 $$p(x|\theta_k)=\prod^D_{i=1} \theta^{x_i}_{k,i}(1-\theta_{k,i})^{1-x_i}$$
 
-In order to  t this model, we need now to  nd the log-likelihood and, as expected, its expression will not be suitable for a direct optimization. The reason is, as usual, that we introduce latent variables for which we have no observations and we therefore need to use an EM algorithm.
-The log-likelihood is taken from the main joint distribution:
+这其实就是之前的同一个分布，只是取一种情况$k$。
+
+为了拟合模型，我们需要找出对数似然率。它的表达式也不适合直接优化。原因是通常情况下，我们引入隐变量是为了考虑观察不到的变量，因此需要使用期望最大化算法。
+
+对数似然率来自主要的联合分布：
 
 $$logp(x|\theta \pi)=\sum^N_{n=1}log(\sum^K_{i=1}\pi_kp(x_i|\theta_i))$$
 
-This is a pretty standard way of computing the log-likelihood. And, as is usually the case for mixture models, the sum inside the log cannot be pushed out. So we end up with a quite complex expression to minimize.
-Now we introduce the latent variable z into the model. It has a categorical distribution with K parameters, such that:
+这是非常标准额计算 对数似然率的形式。和通常的混合模型类似，log对数内部的求和运算无法提出。所以我们得到一个非常复杂的表达式等待最小化。
+
+现在我们引入隐变量$z$，它是带有$K$个参数的类别型分布，满足：
 
 $$p(z|\pi)=\prod^K_{k=1}\pi_k^{z_k}$$
 
-And the joint distribution with x is as follows: 
+带$x$的联合分布如下：
 
 $$p(x|z\theta)=\prod^K_{k=1} p(x|\theta_k )^{z_k}$$
-[ 208 ]
 
-As before with the Gaussian mixture, we will write the complete data log-likelihood. This likelihood is what we would optimize if the data set were complete—that is, without latent variables:
+和高斯混合一样，我们会写出完整的对数似然率。这个似然率是在数据集合完备的情况下，我们要优化的表达式，即不含隐变量：
 
 $$logp(X,Z|\theta \pi)=\sum^N_{n=1} \sum^K_{k=1} z_{n,k}(log \pi_k +\sum^D_{i=1} [x_{n,i}logθ_{k,i}+(1−x_{n,i})log(1−\theta_{k,i})])$$
 
-In this (very long) expression, we consider X and Z to be matrices, so in fact we use the design matrix notation, where each row vector of X (resp. Z) is one set of observations of each variable xi (resp. z).
-Using the Bayes formula, we can calculate the expectation of the complete-data log-likelihood with respect to the distribution of the latent variable. This step is necessary for the E-step of the EM algorithm, where we want to complete the data set:
+在这个（非常长的）表达式中，我们把$X$和$Z$当做矩阵，因此可以使用设计矩阵的表示法，其中$X$（或$Z$）的每一个行向量是每一个变量$x_i$（或$z_i$）的一个观测值集合。
+
+使用贝叶斯公式，我们可以根据隐变量的分布，计算完备数据集合对数似然率的期望。这一步是期望最大化算法中E步骤必须的，我们需要补全数据集：
 
 $$E_z(logp(X,Z|\theta \pi))=\sum^N_{n=1} \sum^K_{k=1} E(z_{n,k})(log \pi_k +\sum^D_{i=1} [x_{n,i}logθ_{k,i}+(1−x_{n,i})log(1−\theta_{k,i})])$$
 
-And the expected value of the latent variable is:
+隐变量的期望值是：
 
 $$E(z_{n,k})=\frac{\pi_kp(x_i|\theta_k)}{\sum^K_{j=1}\pi_j p(x_n|\theta_j)}$$
 
-In a sense, this is not surprising because in the end we need to compute the ratio of zi
-for each subset of the dataset in which it appears after the posterior computations. Finally, in the M-step, we can derive the complete-data log-likelihood with respect to
-the parameters θk and π and set it equal to zero. We obtain the following estimators: 
+某种意义上讲，这并不意外。因为最后我们需要计算数据集中每个子集$z_i$的比率，它会在计算完后验概率后出现。
+
+最后，在M步骤中，我们可以根据参数$\theta_k$和$\pi$推导出完备数据集合对数似然率，并设为0。我们可以得到下列估计：
 
 $$\theta_k=\frac{1}{N_k} \sum^N_{n=1} E(z_{n,k})x_n$$
 
 $$\pi_k=\frac{N_k}{N}$$
 
-Here, Nk =∑N E(zn,k ). n=1
-The EM algorithm will alternate between computing the expectation of z and the new values for the parameters θ and π until convergence.
+这里，$N_k=\sum^N_{n=1} E(z_{n,k})$。
+
+期望最大化算法会在计算$z$期望和参数$\theta$，$\pi$新值之间调整，直到收敛。
 
 ```
-More details about the derivation can be found in Pattern Recognition and Machine Learning, Christopher M. Bishop, Springer, 2007
+关于推导的细节可以在《模式识别和机器学习》（Pattern Recognition and Machine Learning，Christopher M. Bishop, Springer, 2007）中找到。
 ```
 
-This model can be extended and the same principles applied to other types of distribution—for example, a mixture of Poisson or Gamma. On the other hand, the mixture of Bernoulli can be extended to the multinomial case with the same type of derivation.
-In all those models, however, we consider that we have one model for all the data point space. In other words, we somehow use the same model for the whole support of the distribution.
-One extension is to consider that each subspace has its own model and therefore the choice of the sub model made by the latent variable is dependent on the data points. In Adaptive mixtures of local experts, Jacobs, R.A., Jordan, M.I, Nowlan, S.J., and Hinton, G.E. (1991) in Neural Computation, 3, 79-87, such a model is presented. We give a brief review of this interesting model in its simple form.
+这个模型还可以扩展，相同的思想也可以用到其他类型的分布上。例如，泊松混合和Gamma混合。另外，伯努利混合可以用同样的推导扩展到多项式情型
+
+在所有的这些模型中，我们认为模型刻画了所有数据点的空间。换句话说，我们使用同一个模型支持所有分布作为输入。
+
+一个扩展是认为每一个子空间都有自己的模型，因此隐变量对于子模型的选择依赖数据点。在《局部专家自适应混合》（Adaptive mixtures of local experts, Jacobs, R.A., Jordan, M.I, Nowlan, S.J., and Hinton, G.E. (1991), Neural Computation, 3, 79-87）中, 就提出了这样的模型。我们会简单介绍一下在这个有趣的模型。
 
 ## 专家混合
 
-The idea behind mixture of experts is to use a set of linear regressions for each sub space of the original data space and combine them with weighting functions that will successively give weight to each linear regression.
-Consider the following example dataset, which we generate with the following toy code:
+专家混合的思想使用原始数据的每个子空间线性回归模型的集合，并使用持续输出模型权重的权重函数进行合并。
+
+考虑下面的示例数据集，具体生成示例的代码如下：
 
 ```{r,eval=F}
 x1=runif(40,0,10)
 x2=runif(40,10,20)
 e1 = rnorm(20,0,2)
-[ 210 ]
-  
 e2 = rnorm(20,0,3)
 y1 = 1+2.5*x1 + e1
 y2 = 35+-1.5*x2 + e2
@@ -4440,15 +4450,12 @@ xx=c(x1,x2)
 yy=c(y1,y2)
 ```
 
-Plotting the result, and doing a simple linear regression on it, gives the following:
+画出结果，进行简单的线性回归，生成下图：
 
 ![](figures/211_1.png)
 
-Obviously, the linear regression does not capture the behavior of the data at all. It barely captures a general trend in the data that more or less averages the data set.
-Chapter 7
-  [ 211 ]
-  
-Probabilistic Mixture Models
+线性回归明显不能刻画数据集的行为。它几乎完全不能捕捉数据趋势，只是数据集合大致平均。
+
 The idea of mixture of experts is to have several sub models within a bigger model— for example, having several regression lines, as the following graph:
 
 ![](figures/212_1.png)
