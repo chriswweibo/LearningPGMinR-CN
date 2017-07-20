@@ -4568,79 +4568,79 @@ $$p(\theta,z|w\alpha \beta)= \frac{p(\theta,z,w|\alpha,\beta)}{p(w|\alpha,\beta)
 
 ### 变分推断
 
-The main idea in variational inference is to consider a family of lower bounds indexed by variational parameters and optimize on those parameters to  nd the tightest lower bound. Practically speaking, the idea is to approximate a complicated distribution we wish to evaluate by a simpler distribution such that the distance
-(or any suitable metric between the distributions) can be minimized with a convex optimization procedure. The reason we want things to be convex is essentially because convex problems have a global minimum.
-In general, a good approximation for a graphical model consists in simplifying the graph of the model by decoupling variables. In practice, we remove edges.
-In the LDA model, the proposed variational problem is done by decoupling the variables θ and β.
-The resulting graphical model after decoupling no longer shows the connection between θ and zi but includes new free variational parameters. The  nal distribution is given by:
+变分推断的主要思想是通过建立变分参数索引考虑一系列下边界，并优化这些参数找出最紧致的下边界。实际操作中，这个思想会把要评估的复杂分布近似成一个简单 的分布，使得可以通过凸优化过程最小化距离（或者分布之间的其他合适的度量）。我们 需要凸函数的原因是因为凸函数问题有全局最小值。
+
+通常，图模型的优良近似包括解耦变量来简化模型。在实际操作中，我们需要移除边。
+
+在隐狄利克雷分布模型中，变分问题可以通过解耦变量$\theta$和$\beta$实现。
+
+解耦后得到的图模型不再展示$\theta$和$z_i$之间的连接，而是包含了新的变分参数。最终的分布是：
 
 $$q(\theta z|\gamma \psi)=q(\theta|\gamma) \prod^N_{i=1}q(z_i |\psi_i)$$
 
-Here, γ is a Dirichlet variable and Φ a multinomial.
-The optimization problem requires a way to calculate some distance or discrepancy
-between the simpli ed distribution and the real distribution.
-This is usually done by using the Kullback-Leibler divergence between the two
-distributions. The optimization problem is now to  nd (γ, φ) such that: 
+这里$\gamma$是狄利克雷变量$\psi$是一个多项式。
+
+优化问题需要计算简化分布 与 真实分布之间的距离 或者差异。
+
+这个任务通常可以使用两个分布之间的Kullback-Leibler差异度来实现。因此优化问题就是找出$(\gamma, \psi)$，满足：
 
 $$(\gamma^\ast，\phi^\ast)=argmin_{\gamma,\psi} D(q(\theta,z|\gamma,\psi) \parallel p(\theta,z|w,\alpha,\beta))$$
-[ 220 ]
   
-The  tting of the parameters of the model can be done again using the EM algorithm. However, as in inference, the E-step is intractable but can be solved with the variational approximation of this problem.
-The E-step consists in  nding the values for the variational parameters for each document. Then the M-step consists in maximizing the lower bound of the log-likelihood with respect to the parameters α and β. The steps are repeated until convergence of the lower bound on the log-likelihood.
+许多优化算法都可以解决者问题。
+
+模型参数的拟合可以再次使用期望最大化算法来完成。但是，在推断中，E步骤难以计算，可以通过这个问题的变分近似来解决。
+
+E步骤包括找出每个文档变分参数的值。然后M步骤包括根据参数$\alpha$和 $\beta$最大化对数似然率的下边界。这两个步骤会不停额重复，直到对数似然率下边界收敛。
 
 ### 示例
 
-We will use the RtextTools and topicmodels packages. The second one contains an implementation of the LDA model as described before.
-First we load some data:
+我们会使用`RtextTools`和`topicmodels`程序包。第二个程序包包含LDA的实现。 
+
+首先加载数据：
 
 ```{r,eval=F}
 data(NYTimes)
-data ← NYTimes[ samples(1:3100, size=1000,replace=F) ]
+data <- NYTimes[samples(1:3100, size=1000, replace=F)]
 ```
 
-The resulting data.frame contains titles and subject and an associated topic.code. This dataset contains headlines from the New York Times.
-Then we create a matrix suitable for the LDA() function in the topicmodels package:
+得到的`data.frame`包括`titles`，`subject`和相应`topic.code`。这个数据集包括《纽约时报》的标题。
+
+然后创建矩阵，便于程序包`topicmodels`中的`LDA()`函数操作：
 
 ```{r,eval=F}
-matrix ← create_matrix(cbind(as.vector(data$Title),as.
-vector(data$Subject)), language="english," removeNumbers=TRUE,
-stemWords=TRUE)
+matrix <- create_matrix(cbind(as.vector(data$Title),as.vector(data$Subject)), language="english," removeNumbers=TRUE, stemWords=TRUE)
 ```
 
-Next, we set up the number of topics. This is computed by looking at the number of unique topic.code in the original data set. This data set has been specially compiled for this task:
+接着，建立主题数量。这可以通过查看原始数据集中唯一的`topic.code`得到。这个数据集支持这样的查询任务：
 
 ```{r,eval=F}
 k <- length(unique(data$Topic.Code))
 ```
 
-Finally, we run the learning algorithm using the variational EM algorithm. This function also provide a Gibbs sampling method to solve the same problem:
+最后，运行带有变分期望最大化的学习算法。这个函数也提供了Gibbs采样方法来解决同样的问题：
 
 ```{r,eval=F}
 lda <- LDA(matrix, k)
 ```
 
-The result is a topic model with 27 topics, as expected. Let's see this in detail. The returned object is an S4 object (so you will notice we use the @ notation in R).
-[ 221 ]
-Chapter 7
- Many optimization algorithms are able to solve this problem.
-  
-Probabilistic Mixture Models
-Let's take the  rst document and look at its posterior distribution over the topics:
+结果是带有27个主题的主题模型。我们可以具体看一下。返回的对象是一个S4对象（所有你会注意到我们在R中使用@记号）。
+
+让我们取第一个文档，看看一下主题上的后验分布：
 
 ```{r,eval=F}
 print(lda@gamma[1,])
- [1] 0.649978052 0.004191364 0.004191364 0.004191364 0.004191364
+[1] 0.649978052 0.004191364 0.004191364 0.004191364 0.004191364 
 0.004191364 0.004191364 0.004191364 0.004191364 0.004191364 0.004191364
 0.004191364 0.004191364 0.004191364 0.004191364 0.004191364
 [17] 0.004191364 0.004191364 0.115045483 0.004191364 0.004191364
 0.004191364 0.134383733 0.004191364 0.004191364 0.004191364 0.004191364
 ```
 
-We see that the  rst topic has a higher probability. We can plot this to view it better:
+我们看到，第一个主题有较高的概率。为了更好的查看结果，我们可以画出图形：
 
 ![](figures/222_1.png)
 
-And we will also look at an average graph over all the documents by doing:
+我们还可以看到所有文档上的平均图形展示，代码如下：
 
 ```{r,eval=F}
 plot(colSums(lda@gamma)/nrow(lda@gamma),t='h')
@@ -4648,23 +4648,25 @@ plot(colSums(lda@gamma)/nrow(lda@gamma),t='h')
 
 ![](figures/223_1.png)
 
-From there, we can see the distribution over the topics is clearly not uniform, which would have been really surprising.
-So we have a simple way to extract the most probable topic from each document. Note that, in the case of the  rst document, one topic was highly probable and two others appeared too. The rest were insigni cant.
-We can, for example, search for the number of documents that have two or more topics with a probability higher than 10%:
+从这个图中，我们可以看到主题上的分布明显不是均匀分布，这并不意外。
+
+所以我们有了从每个文档中抽取最大概率主题的方法。注意，以第一个文档为例，一个主题的概率较高，同时也出现了另外两个主题。其余的主题就更不显著了。
+
+例如，我们可以搜寻带有两个以上的概率大于10%的主题的文档数量：
 
 ```{r,eval=F}
 sum(sapply( 1:nrow(lda@gamma), function(i) sum(lda@gamma[i,]>0.1) > 1))
 ```
 
-We  nd 649 over 1,000 documents. However, if we look at intervals of 10% from 0% to 100%, we see that this number drops quickly. So it seems that our data set has a lot of documents that identify themselves to only one topic at a time. The following graph shows this progression:
+我们从1000个文档中找出了649个文档。但是，如果我们看一下从0%到100%的每10%的区间，这个数量下降的很快。这似乎说明我们的数据集中许多文档都只属于一个主题。下图给出了这个变化：
 
 ![](figures/224_1.png)
 
-For example, at 30% only a couple of hundred documents still share their topics among at least two topics. Then the number drops. All sorts of analysis can be done on such a collection, such as  nding the words belonging to a topic.
+例如在30%的时候，只有不到200份文档还 拥有至少两个主题。然后数量就下降了，所有分析都可以基于这个图开展k，例如找出属于一个主题的词语等。
 
 ## 小结
 
-In this last chapter, we saw more advanced probabilistic graphical models, whose solution is not easy to compute with standard tools such as the junction tree algorithm. This chapter set out to show that the graphical model framework can still be used even if one has to develop a special algorithm for each model. Indeed, in the LDA model, the solution to the variational problem appeared by looking at the graph of the original LDA and by transforming this graph, thus leading to a better approximation of the initial problem. So, even if the  nal algorithm does not use the graph directly like a junction tree algorithm would do, the solution came from the graph anyway.
+在最后一章中，In this last chapter, we saw more advanced probabilistic graphical models, whose solution is not easy to compute with standard tools such as the junction tree algorithm. This chapter set out to show that the graphical model framework can still be used even if one has to develop a special algorithm for each model. Indeed, in the LDA model, the solution to the variational problem appeared by looking at the graph of the original LDA and by transforming this graph, thus leading to a better approximation of the initial problem. So, even if the  nal algorithm does not use the graph directly like a junction tree algorithm would do, the solution came from the graph anyway.
 [ 224 ]
     
 Chapter 7
