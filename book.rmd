@@ -29,78 +29,23 @@ David Bellot
 
 # 概率图模型R语言学习
 
-Copyright © 2016 Packt Publishing
-All rights reserved. No part of this book may be reproduced, stored in a retrieval system, or transmitted in any form or by any means, without the prior written permission of the publisher, except in the case of brief quotations embedded in critical articles or reviews.
-Every effort has been made in the preparation of this book to ensure the accuracy of the information presented. However, the information contained in this book is sold without warranty, either express or implied. Neither the author, nor Packt Publishing, and its dealers and distributors will be held liable for any damages caused or alleged to be caused directly or indirectly by this book.
-Packt Publishing has endeavored to provide trademark information about all of the companies and products mentioned in this book by the appropriate use of capitals. However, Packt Publishing cannot guarantee the accuracy of this information.
-First published: April 2016 Production reference: 1270416
-Published by Packt Publishing Ltd. Livery Place
-35 Livery Street
-Birmingham B3 2PB, UK.
-ISBN 978-1-78439-205-5
-www.packtpub.com
-
----------
-
-# 致谢
-
-  Author
-David Bellot
-Reviewers
-Mzabalazo Z. Ngwenya Prabhanjan Tattar
-Acquisition Editor
-Divya Poojari
-Content Development Editor
-Trusha Shriyan
-Technical Editor
-Vivek Arora
-Copy Editor
-Stephen Copestake
-  Project Coordinator
-Kinjal Bari
-Proofreader
-Sa s Editing
-Indexer
-Mariammal Chettiyar
-Graphics
-Abhinash Sahu
-Production Coordinator
-Nilesh Mohite
-Cover Work
-Nilesh Mohite
-
 -------
 
 # 关于作者
 
-David Bellot is a PhD graduate in computer science from INRIA, France, with a focus on Bayesian machine learning. He was a postdoctoral fellow at the University of California, Berkeley, and worked for companies such as Intel, Orange, and Barclays Bank. He currently works in the  nancial industry, where he develops  nancial market prediction algorithms using machine learning. He is also a contributor to open source projects such as the Boost C++ library.
+David Bellot是法国国家信息与自动化研究所（INRIA）计算机科学专业的博士，致力于贝叶斯机器学习。他也是美国加州大学伯克利分校的博士后，为因特尔, Orange电信和巴克莱银行等公司工作过。他现在在财经行业工作，使用机器学习技术开发财经市场的预测算法。他也是开源项目，例如Boost C++库的贡献者。
 
 --------
 
 # 关于审稿
 
-Mzabalazo Z. Ngwenya holds a postgraduate degree in mathematical statistics from the University of Cape Town. He has worked extensively in the  eld of statistical consulting and has considerable experience working with R. Areas of interest to him are primarily centered around statistical computing. Previously,
-he has been involved in reviewing the following Packt Publishing titles: Learning RStudio for R Statistical Computing, Mark P.J. van der Loo and Edwin de Jonge;
-R Statistical Application Development by Example Beginner‘s Guide, Prabhanjan Narayanachar Tattar; Machine Learning with R, Brett Lantz; R Graph Essentials, David Alexandra Lillis; R Object-oriented Programming, Kelly Black; Mastering Scienti c Computing with R, Paul Gerrard and Radia Johnson; and Mastering Data Analysis with R, Gergely Darócz.
+Mzabalazo Z. Ngwenya拥有开普敦大学数学统计专业的研究生学历。他在统计咨询行业有广泛的业务，并有大量的R开发经验。他的兴趣主要在统计计算方面。他之前审阅了Packt出版社的书籍《RStudio for R Statistical Computing》（Mark P.J. van der Loo和Edwin de Jonge）；《R Statistical Application Development by Example Beginner‘s Guide》（Prabhanjan Narayanachar Tattar）；《Machine Learning with R》（Brett Lantz）；《R Graph Essentials》（David Alexandra Lillis）；《R Object-oriented Programming》（Kelly Black）；《Mastering Scientific Computing with R》（Paul Gerrard和Radia Johnson）；《Mastering Data Analysis with R》（Gergely Darócz）。
 
-Prabhanjan Tattar is currently working as a senior data scientist at Fractal Analytics, Inc. He has 8 years of experience as a statistical analyst. Survival analysis and statistical inference are his main areas of research/interest. He has published several research papers in peer-reviewed journals and authored two books on R: R Statistical Application Development by Example, Packt Publishing; and A Course in Statistics with R, Wiley. The R packages gpk, RSADBE, and ACSWR are also maintained by him.
+Prabhanjan Tattar现在是Fractal Analytics公司的高级数据科学家。他拥有8年的统计分析经验。生存分析和统计推断是他的主要科研和兴趣方向。他在同行评审的期刊上发表了多篇科研论文，并撰写了两本R语言书籍：《R语言统计应用开发实例》（R Statistical Application Development by Example，Packt Publishing），《R语言统计教程》（A Course in Statistics with R, Wiley）。R程序包gpk, RSADBE和ACSWR也是由他维护的。
+
 
 ---------
 
-# www.PacktPub.com
-eBooks, discount offers, and more
-Did you know that Packt offers eBook versions of every book published, with PDF and ePub  les available? You can upgrade to the eBook version at www.PacktPub. com and as a print book customer, you are entitled to a discount on the eBook copy. Get in touch with us at customercare@packtpub.com for more details.
-At www.PacktPub.com, you can also read a collection of free technical articles, sign up for a range of free newsletters and receive exclusive discounts and offers on Packt books and eBooks.
-TM
-https://www2.packtpub.com/books/subscription/packtlib
-Do you need instant solutions to your IT questions? PacktLib is Packt's online digital book library. Here, you can search, access, and read Packt's entire library of books.
-Why subscribe?
-
-* Fully searchable across every book published by Packt
-* Copy and paste, print, and bookmark content
-* On demand and accessible via a web browser
-              
-------
   
 # 前言
 
@@ -130,7 +75,7 @@ Why subscribe?
 
 ## 环境准备
 
-All the examples in this book can be used with R version 3 or above on any platform and operating system supporting R.
+本书的所有例子都需要版本在3.0以上的R环境中运行。
 
 ## 本书受众
 
@@ -151,58 +96,65 @@ lower_bound <- T%*%posterior_beta - qnorm(0.95)*pred_sigma
 ```
 
 ```
-Warnings or important notes appear in a box like this.
+警告或重要注释的样式。
 ```
 
 ```
-Tips and tricks appear like this.
+小贴士和技巧的样式。
 ```
 
 ## 读者反馈
 
-Feedback from our readers is always welcome. Let us know what you think about this book—what you liked or disliked. Reader feedback is important for us as it helps us develop titles that you will really get the most out of.
-To send us general feedback, simply e-mail feedback@packtpub.com, and mention the book's title in the subject of your message.
-If there is a topic that you have expertise in and you are interested in either writing or contributing to a book, see our author guide at www.packtpub.com/authors.
+永远欢迎读者的反馈。让我们知道你关于这本书的想法——喜欢什么，不喜欢什么 。读者反馈对于我们很重要，它可以帮助我们开发读者真正需要的话题。
+想给我们发送反馈，只需要电邮至 feedback@packtpub.com ，并在邮件主题中告知书名。
+如果你是某个话题的专家，并且有兴趣编写书籍或者给予贡献，请查看我们的作者指导： www.packtpub.com/authors 。
+
+
 
 ## 客户支持
 
-Now that you are the proud owner of a Packt book, we have a number of things to help you to get the most from your purchase.
+你现在已经是Packt书籍的荣誉所有者。你还拥有以下权利：
 
 ## 下载示例代码
 
-You can download the example code  les for this book from your account at http://www.packtpub.com. If you purchased this book elsewhere, you can visit http://www.packtpub.com/support and register to have the  les e-mailed directly to you.
+你可以从 http://www.packtpub.com 的个人账户下载本书的示例代码文件。如果你是从别的地方购买的本书，你可以访问 http://www.packtpub.com/support ，注册后，代码文件会直接电邮给你。你可以通过下列步骤下载代码文件：
 
-You can download the code  les by following these steps:
+1.	使用你的邮箱和密码在我们的网站登录并注册。
+2.	在顶部的SUPPORT标签上悬停光标。
+3.	点击Code Downloads & Errata。
+4.	在Search框中输入书名。
+5.	选取代码文件所在的书籍。
+6.	选择购书途径的下拉菜单。
+7.	点击Code Download。
 
-1. Log in or register to our website using your e-mail address and password.
-2. Hover the mouse pointer on the SUPPORT tab at the top.
-3. Click on Code Downloads & Errata.
-4. Enter the name of the book in the Search box.
-5. Select the book for which you're looking to download the code  les.
-6. Choose from the drop-down menu where you purchased this book from.
-7. Click on Code Download.
+你也可以在本书网站的页面点击**Code Files**按键下载代码文件。这本书的网页可以通过**Search**搜索框输入书名找到。你需要登入自己的Packt账户。
 
-You can also download the code  les by clicking on the Code Files button on the book's webpage at the Packt Publishing website. This page can be accessed by entering the book's name in the Search box. Please note that you need to be logged in to your Packt account.
-Once the  le is downloaded, please make sure that you unzip or extract the folder using the latest version of:
+文件下载完成之后，确保使用下列软件的最新版解压或抽取文件：
+•	WinRAR / 7-Zip for Windows
+•	Zipeg / iZip / UnRarX for Mac
+•	7-Zip / PeaZip for Linux
+本书的代码文件也托管在GitHub： https://GitHub.com/PacktPublishing/R-for-Data-Science-Cookbook 。我们也提供书籍和视频目录地址 https://GitHub.com/PacktPublishing/ ，可以下载代码文件。欢迎查看！
 
-* WinRAR / 7-Zip for Windows
-* Zipeg / iZip / UnRarX for Mac
-* 7-Zip / PeaZip for Linux
+
 
 ## 勘误
 
-Although we have taken every care to ensure the accuracy of our content, mistakes do happen. If you  nd a mistake in one of our books—maybe a mistake in the text or the code—we would be grateful if you could report this to us. By doing so, you can save other readers from frustration and help us improve subsequent versions of this book. If you  nd any errata, please report them by visiting http://www.packtpub. com/submit-errata, selecting your book, clicking on the Errata Submission Form link, and entering the details of your errata. Once your errata are veri ed, your submission will be accepted and the errata will be uploaded to our website or added to any list of existing errata under the Errata section of that title.
-To view the previously submitted errata, go to https://www.packtpub.com/books/ content/support and enter the name of the book in the search  eld. The required information will appear under the Errata section.
+尽管我们已经非常细心的保证内容的正确性，但是错误还是会发生。如果你在我们的书中找到一处错误，不管是文本错误或是代码错误，我们会非常感激将它告诉我们。你的善举会省去其他用户的烦恼，并帮助我们改进本书的后续版本。如果你找到了任何勘误，请访问 http://www.packtpub.com/submit-errata 报告给我们。你只需选取书名，点击Errata Submission Form链接，输入勘误的具体信息。一旦勘误确定之后，我们会接受你的提交。勘误会上传到我们的网站，或者添加到书籍勘误部分已有的勘误列表下。
+要查看以前提交的勘误，访问 https://www.packtpub.com/books/content/support ，在搜索框输入书名。所需信息会出现在Errata部分下。
 
-### 隐私
 
-Piracy of copyrighted material on the Internet is an ongoing problem across all media. At Packt, we take the protection of our copyright and licenses very seriously. If you come across any illegal copies of our works in any form on the Internet, please provide us with the location address or website name immediately so that we can pursue a remedy.
-Please contact us at copyright@packtpub.com with a link to the suspected pirated material.
-We appreciate your help in protecting our authors and our ability to bring you valuable content.
 
-## 问题
 
-If you have a problem with any aspect of this book, you can contact us at questions@packtpub.com, and we will do our best to address the problem.
+### 盗版
+
+互联网上版权资料的盗版问题一直是所有媒介的问题。在Packt，我们一直严肃对待版权和许可的保护问题。如果你在互联网上遇到任何形式的我社出版物的非法副本，请立即把具体地址或者网站名称提供给我们，我们可以采取补救措施。
+请联系 copyright@packtpub.com ，附上可疑的盗版材料的链接。
+我们非常感谢你在保护作者方面的努力，同时注重提升自我能力，给你带来更有价值的内容。
+
+
+## 疑问
+
+如果你对本书有任何疑问，你可以联系我们 questions@packtpub.com， 我们会尽全力解决您的问题。
   
 -------
 
@@ -4677,248 +4629,30 @@ sum(sapply( 1:nrow(lda@gamma), function(i) sum(lda@gamma[i,]>0.1) > 1))
 # 附录
 
 ## 参考文献
+下面的参考文献都是在本书的编写过程中用到的。我们鼓励想对概率图模型和贝叶斯建模有进一步了解的读者可以阅读这些文献。
 
-The following references were used while writing this book. We encourage those of you who want to go further into the  eld of probabilistic graphical models and Bayesian modeling to read at least some of them.
-Many of our examples and presentations of algorithms took inspiration from these books and papers.
+本书中的许多例子和解释都是从这些文献中得到启发。
 
 ### 有关贝叶斯历史的书籍
 
-* Gelman, A., Carlin, J.B., Stern, H.S., Dunson, D.B, Vehtari, A., and Rubin, D.B.. Bayesian Data Analysis, 3rd Edition. CRC Press. 2013. This is a reference book on Bayesian modeling covering topics from the most fundamental aspects to the most advanced, with the focus on modeling and also on computations.
-* Robert, C.P.. The Bayesian Choice: From Decision-Theoretic Foundations to Computational Implementation. Springer. 2007. This is a beautiful presentation of the Bayesian paradigm with many examples. The book is more theoretical but has a rigorous presentation of many aspects of the Bayesian paradigm.
-* McGrayne, Sharon Bertsch. The Theory That Would Not Die. Yale University Press. 2011. This talks about how Bayes' rule cracked the Enigma code, hunted down Russian submarines, and emerged triumphant from two centuries of controversy. It is a brilliantly written history of Bayes' rule going from the seminal paper of Thomas Bayes to the latest advances in the 21st century.
+* Gelman, A., Carlin, J.B., Stern, H.S., Dunson, D.B, Vehtari, A., and Rubin, D.B.. Bayesian Data Analysis, 3rd Edition. CRC Press. 2013。这本关于贝叶斯建模的参考书从最基本的概念介绍到最前沿得到技术，并关注建模和计算流程。
+* Robert, C.P.. The Bayesian Choice: From Decision-Theoretic Foundations to Computational Implementation. Springer. 2007。 这本书更加理论，但是给出了贝叶斯范式许多概念的严格推导。
+* McGrayne, Sharon Bertsch. The Theory That Would Not Die. Yale University Press. 2011。 这本书介绍了贝叶斯规则如何破解英格玛密码，帮助击沉俄国潜艇，取得了两个世纪以来的伟大胜利。从托马斯贝叶斯的第一篇文章到21世纪的最新进展，这本书都做了生动的历史回顾。
 
 ### 有关机器学习的书籍
 
-* Murphy, K.P.. Machine Learning: A Probabilistic Perspective. The MIT Press. 2012. This is a book on machine learning in general with a lot of algorithms. It covers more than just graphical models and Bayesian models. It is one of the best references.
-* Bishop, C.M. Pattern Recognition and Machine Learning. Springer. 2007. This is one of the best books on machine learning, covering many aspects and going through many details of the implementation of each algorithm.
-* Barber, D.. Bayesian Reasoning and Machine Learning. Cambridge University Press. 2012. This is another excellent reference book covering many aspects of machine learning with a specific focus on Bayesian models.
-* Robert, C.P.. Monte Carlo Methods in Statistics. 2009. (http://arxiv.org/ pdf/0909.0389.pdf) This is an excellent paper on the Monte Carlo methods, and it is very pedagogical.
-* Koller, D. and Friedman, N.. Probabilistic Graphical Models: Principles and Techniques. The MIT Press. 2009. This is the most complete and advanced book on probabilistic graphical models. It covers all aspects of the domain. This book is very dense, with thorough details on many algorithms related to PGM and useful demonstrations. Probably the best book on PGM.
-* Casella, G. and Berger, R.L.. Statistical Inference, 2nd Edition. Duxbury. 2002: This is a reference book on standard statistics with many detailed demonstrations. It's a book that anyone doing statistics should read.
-* Hastie, T., Tibshirani, R., and Friedman, J.. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. Springer. 2013: This is a book best-seller and covers the most important aspects of machine learning from a statistical point of view.
+* Murphy, K.P.. Machine Learning: A Probabilistic Perspective. The MIT Press. 2012。这本书 介绍了额机器学习的很多算法。它不仅仅介绍了图模型和贝叶斯模型。这是最好的参考书之一。
+* Bishop, C.M. Pattern Recognition and Machine Learning. Springer. 2007。这是有关机器学习最好的书籍之一，涵盖了许多方面，并介绍了每一个算法的许多实现细节。
+* Barber, D.. Bayesian Reasoning and Machine Learning. Cambridge University Press. 2012。这是另外一本不错的书籍，介绍了机器学习的许多方面，特别介绍了贝叶斯模型。
+* Robert, C.P.. Monte Carlo Methods in Statistics. 2009。(http://arxiv.org/pdf/0909.0389.pdf) 这是有关蒙特卡洛方法的很好的文章，偏教学。
+* Koller, D. and Friedman, N.. Probabilistic Graphical Models: Principles and Techniques. The MIT Press. 2009。这是有关概率图模型的最完整最前沿的书籍。它介绍了该领域的所有内容。这本书内容很丰富，给出了有关概率图模型的许多算法细节和有用的展示。它可能是概率图模型最好的书籍。 
+* Casella, G. and Berger, R.L.. Statistical Inference, 2nd Edition. Duxbury. 2002。这是一本经典统计学的参考书，有许多详实的阐述，每个做统计的人都应该读一读。
+* Hastie, T., Tibshirani, R., and Friedman, J.. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. Springer. 2013。这是一本畅销书，从统计的角度介绍了机器学习的最重要的概念。
 
 ### 文章
 
-* Jacobs, R.A., Jordan, M.I, Nowlan, S.J., and Hinton, G.E. Adaptive mixtures of local experts. 1991 in Neural Computation, 3, 79-87: This is the reference paper on mixture of experts as seen in Chapter 7, Probabilistic Mixture Models.
-* Blei, David M., Ng, Andrew, Y, Jordan, Michael, I. Latent Dirichlet Allocation. January 2003, Journal of Machine Learning Research 3 (4–5), p993–1022: This is a reference paper on the LDA model as seen in Chapter 7, Probabilistic Mixture Models.
+* Jacobs, R.A., Jordan, M.I, Nowlan, S.J., and Hinton, G.E. Adaptive mixtures of local experts. 1991 in Neural Computation, 3, 79-87。这篇文章是关于专家混合的，用在第7章，*概率混合模型*中。
+* Blei, David M., Ng, Andrew, Y, Jordan, Michael, I. Latent Dirichlet Allocation. January 2003, Journal of Machine Learning Research 3 (4–5), p993–1022。这是有关LDA模型的参考文章，用在第7章，*概率混合模型*中。
 
 
-### 索引
-   
-A
-ancestral sampling 128 arm package 195
-B
-basic sampling algorithms
-about 129
-standard distributions 129-133
-Bayesian Linear models
-about 176
-graphical model 179-181 implementation, in R 184-188 over- tting 176-179
-packages 194
-packages, in R 195
-posterior distribution 181-184 stable implementation 188-194
-Bayesian Naive Bayes 104-106 Bayesian theory
-references 227
-bayesm package 194 Bayes' rule
-about 11
-conditional probability 12 example 13-19
-formula, interpreting 13
-Bernoulli distribution 108 Beta-Binomial
-Index
-cluster nodes 54
-conjugacy property 112, 113 continuous random variable 36
-D
-Dirichlet distribution 105 discrete random variable 36 discrete sepal width (dsw) 74 d-separation 37
-E
-empirical distribution
-relating, to model distribution 79-81
-Expectation Maximization (EM) algorithm
-about 70
-applying, to graphical models 93, 94 derivation 91, 92
-for mixture models 200-206 principles 90
-with hidden variables 88
-G
-gating function 213 Gaussian mixture model
-about 115 de ning 116-122 example 115
-generative models 70
-[ 229 ]
-about 106-111
-posterior distribution, with conjugacy
-property 112, 113
-prior distribution 111, 112
-values, selecting for Beta parameters 113
-Binomial distribution 110
-bnlearn R package
-about 65 URL 65
-C
-  
-glmnet package 184, 194 graphical models
-building 35
-Expectation Maximization (EM) algorithm,
-applying to 93, 94 graphs, building 37
-of Bayesian Linear models 179-181
-random variable, types 36
-graphs
-building 37
-probabilistic expert system 37-40 probabilistic graphical models, basic
-structures 40-43
-H
-Hidden Markov Model 42 hidden variables
-about 88
-Expectation Maximization (EM) algorithm,
-using 88
-latent variables 89, 90
-I
-importance sampling
-about 132-144
-implementation, in R 144-152
-importance weight 143 independently and identically
-distributed (iid) 70
-J
-joint probability distribution, uncertainty
-about 10
-marginalization 11
-junction tree
-about 54
-building 52-55
-junction tree algorithm
-about 51, 52 implementing 55-61
-K
-Kullback-Leibler divergence 80
-L
-L1-penalization (Lasso) 174, 184 L2 penalization 173
-Latent Dirichlet Allocation (LDA)
-about 197, 215, 216
-examples 221-224
-graphical model 216-220 variational inference 220, 221
-latent variable models 88 latent variables
-about 89, 90
-using 115
-learning by inference
-about 75
-probability, estimating 75-78
-likelihood 13 linear regression
-about 169
-example 170
-parameters, estimating 170-174
-M
-machine learning
-about 2, 4
-references 228
-MAP queries 33
-Markov Chain Monte-Carlo (MCMC)
-about 144, 152
-for probabilistic graphical models 163 methods 153, 154
-Metropolis-Hastings algorithm 154-162 RStan, installing 163
-Stan, installing 163
-Markov Model 42 maximum a posteriori 70 maximum likelihood
-application 86-88
-empirical distribution, relating to model
-distribution 79-81 estimation 79
-ML algorithm, implementing 82-86
-Maximum Likelihood Estimator (MLE) 182 medical expert system 63 Metropolis-Hastings algorithm 154-162 mixing proportions 116
-mixture components 116
-[ 230 ]
-  
-mixture models
-about 198
-example 199, 200
-Expectation Maximization (EM) algorithm,
-using 200-206
-mixture of Bernoulli 207-210 mixture of experts 210-215 ML algorithm
-implementing 82-86
-model calibration 69 model distribution
-relating, to empirical distribution 79-81
-Monte-Carlo sampling 125
-N
-Naive Bayes model
-about 98
-Bayesian Naive Bayes 104-06 example 98, 99 implementing 101-103 representation 100, 101
-Noisy-OR model 64
-O
-over- tting
-about 104
-solving, with Bayesian Linear
-models 176-179
-P
-packages, R
-arm package 195 bayesm package 194 glmnet package 194
-parameter  tting 69 parameter learning
-about 69
-Iris dataset, estimating 72-74 Iris dataset, loading 71
-plate notation 75 posterior distribution
-probabilistic expert system
-about 40 example 37-40 reference link 37
-probabilistic graphical models (PGM), examples
-medical expert system 63
-models, with more than two layers 64, 65 sprinkler example 62
-tree structure 66, 67
-probabilistic graphical models (PGM)
-about 3, 20
-applications 26-29
-basic structures 40-43
-directed models 24
-distribution, factorizing 23
-example 26-29
-graphs and conditional independence 21-23 Markov Chain Monte-Carlo (MCMC) 163 probabilistic models 20, 21
-undirected models 25
-probabilistic queries 33 probability calculus, uncertainty
-and random variables 8, 9 event 8
-probability 8
-realization 8
-sample space 8
-pseudo-random numbers 129
-Q
-queries
-MAP queries 33 probabilistic queries 33
-R
-R
-random variable
-about 36
-continuous random variable 36
-about 13
-used, with Bayesian Linear models 181-184 with conjugacy property 112, 113
-prior distribution 13, 107-112
-Bayesian Linear models, implementing 184-188
-importance sampling, implementation 144-152
-Markov Chain Monte-Carlo (MCMC) 163
-rejection sampling, implementation 135-142
-[ 231 ]
-  
-discrete random variable 36
-random variables, uncertainty
-about 8
-probability distribution 9
-rejection sampling
-about 132-135
-implementation, in R 135-142
-ridge regression 173 RStan
-example 164 installing 163 URL 163
-S
-sampling
-from distribution 126-129
-sampling algorithms 125 seed 129
-separator nodes 54 sprinkler example 62 Stan
-installing 163
-T
-trees
-about 34
-tree structure 66, 67
-U
-uncertainty
-as probabilities 6
-Bayesian interpretation 6
-Bayes' rule 11, 12
-conditional probability 7 frequentist interpretation 6
-joint probability distributions 10, 11 probability calculus 7
-random variables 8
-representing, with probabilities 5
-V
-variable elimination 44, 46 variational inference 220, 221
-standard distributions 129-133
-stop words 216
-structural learning 24
-sum-product variable elimination algorithm
-about 47, 48 implementing 49, 50
-[ 232 ]
   
