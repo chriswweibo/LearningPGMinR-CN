@@ -4666,14 +4666,13 @@ sum(sapply( 1:nrow(lda@gamma), function(i) sum(lda@gamma[i,]>0.1) > 1))
 
 ## 小结
 
-在最后一章中，In this last chapter, we saw more advanced probabilistic graphical models, whose solution is not easy to compute with standard tools such as the junction tree algorithm. This chapter set out to show that the graphical model framework can still be used even if one has to develop a special algorithm for each model. Indeed, in the LDA model, the solution to the variational problem appeared by looking at the graph of the original LDA and by transforming this graph, thus leading to a better approximation of the initial problem. So, even if the  nal algorithm does not use the graph directly like a junction tree algorithm would do, the solution came from the graph anyway.
-[ 224 ]
-    
-Chapter 7
-This chapter proved how powerful probabilistic graphical models can be, and all the possibilities and new models that can be created from simpler models.
-Indeed, each of these models can again be extended either by combining them—for example, in the mixture of experts model. In this model, each expert function could be replaced by another mixture of experts model, creating a hierarchical mixture of experts. This is a probabilistic version of the decision tree but with smooth transitions and an increased ability to deal with uncertainty.
-We have  nally reached the end of our journey into the world of probabilistic graphical models. But, as with all journeys, it is just a start and we encourage the reader to look for all the R packages dedicated to graphical models and to write his or her own algorithms. Following the graphs and the generic recipes found in this book, it is possible to go way beyond the standard models and solutions we presented here; the only limit is your imagination.
- [ 225 ]
+在最后一章中，我们看到了更先进的概率图模型，使用标准的诸如联结树算法进行求解并不容易。本章首先展示了图模型框架依然可以用到人们开发的 具体算法中。事实上，在LDA模型中，变分问题的答案是在观察了原始LDA的图模型后发现的，通过转换图形，生成原始问题更好的近似。所以，尽管最后的算法并没有项联结树算法那样直接使用图模型，但是答案依然来自于图模型本身。
+
+本章展示的概率图模型的强大之处。所有的概率和新的模型都可以从简单的模型创建。
+
+每一个模型实际上可以再次扩展，像专家混合模型一样合并它们。在这个模型中，每一个专家函数可以被另外的专家混合模型替代，进而构造专家层级混合模型。这是决策树的概率版本，但是添加了平滑转换和处理不确定性的能力。
+
+我们已经介绍完了概率图模型的。但是，这只是一个开始，我们鼓励读者去发现所有的图模型R程序包，并编写自己的代码。学习了本书中的图模型和原生方法，我们可以越过标准模型和解决方案。唯一的限制就是自己的想象力。
   
 # 附录
 
